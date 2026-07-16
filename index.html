@@ -227,6 +227,54 @@
     align-items:center;justify-content:center;gap:7px;}
   .accent-f .morebtn{color:#8a3444;}
   button,.chip2,.pcard,.cbx,.col,.sw,.tab,.vistile,.qc{touch-action:manipulation;-webkit-tap-highlight-color:rgba(51,51,51,.06);}
+  /* 選び方セグメント */
+  .viewseg{display:flex;gap:8px;margin-bottom:14px;}
+  .vbtn{flex:none;border:1.4px solid var(--line);background:#fff;border-radius:22px;padding:9px 20px;font:inherit;
+    font-size:13px;font-weight:700;color:var(--sub);cursor:pointer;transition:.14s;display:inline-flex;align-items:center;gap:7px;}
+  .accent-d .vbtn.on{background:var(--navy);border-color:var(--navy);color:#fff;}
+  .accent-f .vbtn.on{background:var(--rose);border-color:var(--rose);color:#fff;}
+  /* 作例ギャラリー */
+  .gnote{font-size:12px;color:var(--sub);margin:0 0 12px;}
+  .photogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;}
+  .ptile{cursor:pointer;}
+  /* ♡候補ボタン */
+  .hbtn{position:absolute;right:8px;bottom:8px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);
+    background:rgba(255,255,255,.94);display:grid;place-items:center;cursor:pointer;transition:.14s;padding:0;z-index:2;}
+  .hbtn svg{width:17px;height:17px;fill:none;stroke:#a89f92;stroke-width:2;stroke-linejoin:round;}
+  .hbtn.on{background:var(--rose);border-color:var(--rose);}
+  .hbtn.on svg{fill:#fff;stroke:#fff;}
+  .pcard .photobadge{max-width:calc(100% - 52px);}
+  .qcand{width:100%;margin:12px 0 0;border:1.6px solid var(--line);background:#fff;border-radius:12px;padding:12px;
+    font:inherit;font-size:13.5px;font-weight:700;color:var(--sub);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .qcand svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round;}
+  .qcand.on{border-color:var(--rose);color:var(--rose);background:var(--rose-soft);}
+  .qcand.on svg{fill:var(--rose);stroke:var(--rose);}
+  /* 候補トレー */
+  .candbar{position:fixed;right:18px;bottom:18px;z-index:55;display:none;align-items:center;gap:9px;background:var(--navy-d);
+    color:#fff;border-radius:30px;padding:9px 20px 9px 12px;box-shadow:0 10px 30px rgba(0,0,0,.28);cursor:pointer;
+    font-size:13px;font-weight:700;border:none;font-family:inherit;transition:bottom .25s;}
+  .candbar.show{display:flex;}
+  .candbar.accent-f{background:#8a2d3c;}
+  .candbar img{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid #fff;margin-right:-12px;background:#f6f5f0;}
+  .candbar img:last-of-type{margin-right:2px;}
+  /* 見比べモーダル */
+  .cmpbox{background:#fff;border-radius:20px;max-width:1020px;width:100%;box-shadow:0 24px 70px rgba(0,0,0,.34);
+    animation:pop .26s ease;margin:auto;overflow:hidden;display:flex;flex-direction:column;max-height:calc(100dvh - 40px);}
+  .cmphead{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line);flex:none;}
+  .cmphead .t{font-size:14px;font-weight:700;}
+  .swipehint{display:none;text-align:center;font-size:11px;color:var(--sub);padding:8px 0 0;}
+  .cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;padding:18px;overflow-y:auto;}
+  .cmpcard{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;display:flex;flex-direction:column;}
+  .cmpcard .cimg{width:100%;aspect-ratio:3/4;object-fit:cover;background:#f6f5f0;cursor:zoom-in;display:block;}
+  .cmpcard .cbody{padding:12px 12px 13px;display:flex;flex-direction:column;gap:7px;flex:1;}
+  .cmpcard .cnm{font-size:13.5px;font-weight:700;line-height:1.4;}
+  .cmpcard .cspec{font-size:11.5px;color:var(--sub);line-height:1.7;}
+  .cgo{border:1.4px solid var(--line);background:#fff;border-radius:10px;padding:10px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;color:var(--ink);}
+  .cgo.main{margin-top:auto;}
+  .accent-d .cgo.main{background:var(--navy);border-color:var(--navy);color:#fff;}
+  .accent-f .cgo.main{background:var(--rose);border-color:var(--rose);color:#fff;}
+  .cdel{border:none;background:none;color:#a89f92;font:inherit;font-size:11px;cursor:pointer;padding:4px;}
+  .cna{font-size:11px;color:#a89f92;background:#f8f7f2;border-radius:8px;padding:9px;text-align:center;margin-top:auto;}
   @media(max-width:820px){.tab .ts{display:none;}h1{font-size:21px;}.grid2{grid-template-columns:repeat(auto-fill,minmax(136px,1fr));}
     .qvbody{grid-template-columns:1fr;}.qvmain img{height:300px;}.heroC{grid-template-columns:1fr;}.heroB{grid-template-columns:1fr 1fr;}}
   /* ===== スマホ最適化（640px以下・PC表示には影響しない） ===== */
@@ -247,7 +295,26 @@
     .tools{gap:8px;margin-bottom:10px;}
     .search{min-width:0;width:100%;padding:12px 14px;}
     .search input{font-size:16px;}
-    .count{font-size:11.5px;}
+    .count{font-size:11.5px;white-space:normal;width:100%;}
+    .photonote{margin-left:0;}
+    /* 選び方セグメント：全幅2分割 */
+    .viewseg{gap:7px;margin-bottom:12px;}
+    .vbtn{flex:1;justify-content:center;padding:12px 8px;font-size:12.5px;}
+    /* 作例ギャラリー：2列＋折りたたみ */
+    .gnote{font-size:11.5px;}
+    .photogrid{grid-template-columns:repeat(2,1fr);gap:10px;}
+    .photogrid.collapsed>*:nth-child(n+9){display:none;}
+    .hbtn{width:38px;height:38px;}
+    /* 候補トレー：下部センター・setbar表示中はせり上げ */
+    .candbar{left:50%;right:auto;transform:translateX(-50%);white-space:nowrap;bottom:calc(env(safe-area-inset-bottom) + 14px);}
+    body.setbar-vis .candbar{bottom:calc(env(safe-area-inset-bottom) + 190px);}
+    /* 見比べ：ボトムシート＋横スワイプsnap */
+    #cmpov{padding:30px 0 0;place-items:end center;}
+    .cmpbox{max-width:100%;margin:0;border-radius:20px 20px 0 0;max-height:calc(100dvh - 30px);animation:sheetup .3s ease;}
+    .swipehint{display:block;}
+    .cmp{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;gap:12px;padding:14px;-webkit-overflow-scrolling:touch;}
+    .cmpcard{flex:0 0 76vw;scroll-snap-align:center;}
+    .cmpcard .cimg{aspect-ratio:3/4;}
     .chips2{flex-wrap:nowrap;overflow-x:auto;margin:0 -14px 14px;padding:2px 14px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
     .chips2::-webkit-scrollbar{display:none;}
     .chip2{flex:none;white-space:nowrap;padding:9px 16px;font-size:13px;}
@@ -341,13 +408,24 @@
 
   <section id="mode-d" class="accent-d">
     <div class="step"><span class="n">1</span>型紙をさがして選ぶ（カードで詳細確認）</div>
+    <div class="viewseg" id="d-seg">
+      <button class="vbtn on" onclick="switchView('d','list')">📋 一覧から選ぶ</button>
+      <button class="vbtn" onclick="switchView('d','photos')">📷 作例写真から選ぶ</button>
+    </div>
     <div class="tools"><label class="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-      <input id="d-q" type="text" placeholder="型紙をさがす（例：ワンピース、No.50、ブラウス）" oninput="ST.d.q=this.value;renderGridD();"></label>
+      <input id="d-q" type="text" placeholder="型紙をさがす（例：ワンピース、No.50、ブラウス）" oninput="ST.d.q=this.value;renderD();"></label>
       <div class="count" id="d-count"></div></div>
     <div class="chips2" id="d-chips"></div>
-    <div class="grid2" id="d-grid"></div>
-    <button class="morebtn" id="d-more" onclick="togMore('d')"></button>
-    <div class="prop" id="d-prop">
+    <div id="d-list">
+      <div class="grid2" id="d-grid"></div>
+      <button class="morebtn" id="d-more" onclick="togMore('d')"></button>
+    </div>
+    <div id="d-photos" class="hidden">
+      <div class="gnote" id="d-gnote"></div>
+      <div class="photogrid" id="d-pgrid"></div>
+      <button class="morebtn" id="d-pmore" onclick="togMoreG('d')"></button>
+    </div>
+    <div class="prop" id="d-prop" style="display:none">
       <div class="step" style="margin-top:28px"><span class="n">2</span>自動提案を確認・調整</div>
       <div class="propbox"><div class="panel" id="d-panel"></div><div id="d-setbar"></div>
         <p class="setnote">※ 数量・金額は概算（実装イメージ）。用尺の目安は各型紙の用尺表に基づき確定します。作例写真は実際にその生地で仕立てた作品です。</p></div>
@@ -356,13 +434,24 @@
 
   <section id="mode-f" class="accent-f hidden">
     <div class="step"><span class="n">1</span>生地をさがして選ぶ（カードで詳細確認）</div>
+    <div class="viewseg" id="f-seg">
+      <button class="vbtn on" onclick="switchView('f','list')">📋 一覧から選ぶ</button>
+      <button class="vbtn" onclick="switchView('f','photos')">📷 作例写真から選ぶ</button>
+    </div>
     <div class="tools"><label class="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-      <input id="f-q" type="text" placeholder="生地をさがす（例：リネン、Helena、ウール）" oninput="ST.f.q=this.value;renderGridF();"></label>
+      <input id="f-q" type="text" placeholder="生地をさがす（例：リネン、Helena、ウール）" oninput="ST.f.q=this.value;renderF();"></label>
       <div class="count" id="f-count"></div></div>
     <div class="chips2" id="f-chips"></div>
-    <div class="grid2" id="f-grid"></div>
-    <button class="morebtn" id="f-more" onclick="togMore('f')"></button>
-    <div class="prop" id="f-prop">
+    <div id="f-list">
+      <div class="grid2" id="f-grid"></div>
+      <button class="morebtn" id="f-more" onclick="togMore('f')"></button>
+    </div>
+    <div id="f-photos" class="hidden">
+      <div class="gnote" id="f-gnote"></div>
+      <div class="photogrid" id="f-pgrid"></div>
+      <button class="morebtn" id="f-pmore" onclick="togMoreG('f')"></button>
+    </div>
+    <div class="prop" id="f-prop" style="display:none">
       <div class="step" style="margin-top:28px"><span class="n">2</span>自動提案を確認・調整</div>
       <div class="propbox"><div class="panel" id="f-panel"></div><div id="f-setbar"></div>
         <p class="setnote">※ 数量・金額は概算（実装イメージ）。用尺の目安は各型紙の用尺表に基づき確定します。作例写真は実際にその生地で仕立てた作品です。</p></div>
@@ -388,6 +477,16 @@
 </div>
 <!-- lightbox -->
 <div class="ov" id="lbov" onclick="closeLB()"><div class="lbox" onclick="event.stopPropagation()"><button class="lbclose" onclick="closeLB()">✕ 閉じる</button><img id="lbimg" alt=""><div class="lbcap" id="lbcap"></div></div></div>
+<!-- 候補トレー -->
+<button class="candbar" id="candbar" onclick="openCmp()"></button>
+<!-- 見比べ -->
+<div class="ov" id="cmpov" onclick="if(event.target===this)closeCmp()">
+  <div class="cmpbox">
+    <div class="cmphead"><div class="t" id="cmp-title"></div><button class="qvclose" onclick="closeCmp()">✕</button></div>
+    <div class="swipehint">← 横にスワイプして見比べられます →</div>
+    <div class="cmp" id="cmp-body"></div>
+  </div>
+</div>
 
 <script>
 const IMG="https://makeshop-multi-images.akamaized.net/gmosp1040/itemimages/";
@@ -486,8 +585,50 @@ const fSwatch=id=>(EF[id]&&EF[id].swatch&&EF[id].swatch.length)?EF[id].swatch[0]
 const fColors=id=>(EF[id]&&EF[id].colors)?EF[id].colors:[];
 const fHero=id=>{const s=fSamples(id);return s.length?s[0]:fSwatch(id);};
 
-const ST={d:{q:"",cat:"all",sel:null,fab:null,fq:0,shin:"thin",shinQ:1,parts:{},pQ:{tape:1,ito:1,btn:1},cIdx:0,expanded:false},
-          f:{q:"",mat:"all",sel:null,pat:null,fq:0,shin:"thin",shinQ:1,parts:{},pQ:{tape:1,ito:1,btn:1},cIdx:0,expanded:false}};
+const ST={d:{q:"",cat:"all",sel:null,fab:null,fq:0,shin:"thin",shinQ:1,parts:{},pQ:{tape:1,ito:1,btn:1},cIdx:0,expanded:false,gExpanded:false,view:'list',cands:[]},
+          f:{q:"",mat:"all",sel:null,pat:null,fq:0,shin:"thin",shinQ:1,parts:{},pQ:{tape:1,ito:1,btn:1},cIdx:0,expanded:false,gExpanded:false,view:'list',cands:[]}};
+const HEART='<svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.6-9.8-9C.6 9.2 2 5.6 5.4 4.8c2-.5 4 .3 5.1 2 .3.5.8.5 1.1 0 1.1-1.7 3.1-2.5 5.1-2 3.4.8 4.8 4.4 3.2 7.2-2.6 4.4-9.9 9-9.9 9z"/></svg>';
+function activeMode(){return (document.querySelector('.tab.active')||{}).dataset?.mode||'d';}
+/* 選び方ビュー切替（一覧／作例写真） */
+function switchView(m,v){ST[m].view=v;
+  document.getElementById(m+'-list').classList.toggle('hidden',v!=='list');
+  document.getElementById(m+'-photos').classList.toggle('hidden',v!=='photos');
+  document.querySelectorAll('#'+m+'-seg .vbtn').forEach((b,i)=>b.classList.toggle('on',(i===0)===(v==='list')));}
+/* ♡候補キープ（見比べて選ぶ） */
+function heartBtn(m,id){return `<button class="hbtn ${ST[m].cands.includes(id)?'on':''}" aria-label="候補に入れる" onclick="event.stopPropagation();toggleCand('${m}','${id}')">${HEART}</button>`;}
+function toggleCand(m,id){const a=ST[m].cands,i=a.indexOf(id);
+  if(i>=0)a.splice(i,1);else{a.push(id);if(a.length>6)a.shift();}
+  m==='d'?renderD():renderF();renderCandbar();updQVCand();}
+function renderCandbar(){const m=activeMode(),a=ST[m].cands,el=document.getElementById('candbar');
+  if(!a.length){el.classList.remove('show');return;}
+  el.className='candbar show '+(m==='f'?'accent-f':'accent-d');
+  const th=a.slice(0,4).map(id=>{const im=m==='d'?pHero(id):fSwatch(id);return `<img src="${im}" loading="lazy">`;}).join('');
+  el.innerHTML=`${th}<span>候補 ${a.length}件を見比べる</span>`;}
+function updQVCand(){const b=document.getElementById('qv-cand');if(!b||!QV.type||QV.type==='n')return;
+  const m=QV.type==='p'?'d':'f',on=ST[m].cands.includes(QV.id);
+  b.classList.toggle('on',on);b.querySelector('span').textContent=on?'候補に入れました（タップで外す）':'候補に入れて見比べる';}
+/* 見比べモーダル */
+function openCmp(){const m=activeMode(),a=ST[m].cands;if(!a.length)return;
+  document.getElementById('cmpov').className='ov show '+(m==='f'?'accent-f':'accent-d');
+  document.getElementById('cmp-title').textContent=(m==='d'?'候補の型紙':'候補の生地')+`を見比べる（${a.length}件）`;
+  document.getElementById('cmp-body').innerHTML=a.map(id=>m==='d'?cmpCardP(id):cmpCardF(id)).join('');}
+function cmpCardP(id){const p=PAT_BY[id],meters=(FQ[p.cat]*0.5).toFixed(1),can=hasPatPhoto(id),hero=pHero(id);
+  return `<div class="cmpcard"><img class="cimg" src="${hero}" ${FB(hero,pThumb(p))} onclick="lightbox('${esc(hero)}','${esc(p.no+' '+p.nm)}')">
+    <div class="cbody"><div class="qcode">${p.no}・${CATNAME[p.cat]}</div><div class="cnm">${p.nm}</div>
+    <div class="cspec">型紙 ${yen(p.pr)}（税込）<br>用尺目安 約${meters}m ・ サイズ ${(EP[id]&&EP[id].sizes)||"SML・2L"}</div>
+    <button class="cgo" onclick="closeCmp();openQV('p','${id}')">詳細を見る（作例写真）</button>
+    ${can?`<button class="cgo main" onclick="cmpPick('${id}')">この型紙で提案してもらう</button>`:`<div class="cna">自動提案デモは対象外（作例なし）</div>`}
+    <button class="cdel" onclick="cmpRemove('${id}')">✕ 候補から外す</button></div></div>`;}
+function cmpCardF(id){const f=FAB_BY[id],can=hasFabPhoto(id),hero=fHero(id);
+  return `<div class="cmpcard"><img class="cimg" src="${hero}" ${FB(hero,fThumb(f))} onclick="lightbox('${esc(hero)}','${esc(f.nm)}')">
+    <div class="cbody"><div class="qcode">${f.code}・${f.mat}</div><div class="cnm">${f.nm}</div>
+    <div class="cspec">${yen(f.unit)}／50cm ・ ${(EF[id]&&EF[id].width)||f.w}<br>${(EF[id]&&EF[id].desc)||f.thin}</div>
+    <button class="cgo" onclick="closeCmp();openQV('f','${id}')">詳細を見る（色展開・作例）</button>
+    ${can?`<button class="cgo main" onclick="cmpPick('${id}')">この生地で提案してもらう</button>`:`<div class="cna">自動提案デモは対象外（作例なし）</div>`}
+    <button class="cdel" onclick="cmpRemove('${id}')">✕ 候補から外す</button></div></div>`;}
+function cmpPick(id){const m=activeMode();closeCmp();m==='d'?selPat(id):selFab(id);}
+function cmpRemove(id){const m=activeMode();toggleCand(m,id);ST[m].cands.length?openCmp():closeCmp();}
+function closeCmp(){document.getElementById('cmpov').classList.remove('show');}
 /* スマホ用：グリッドの「もっと見る」折りたたみ（PCではCSSで常時全件表示） */
 function updMore(m,listLen,label){
   const g=document.getElementById(m+'-grid');g.classList.toggle('collapsed',!ST[m].expanded);
@@ -496,12 +637,13 @@ function updMore(m,listLen,label){
 function togMore(m){ST[m].expanded=!ST[m].expanded;m==='d'?renderGridD():renderGridF();
   if(!ST[m].expanded)document.getElementById(m+'-grid').scrollIntoView({behavior:'smooth',block:'start'});}
 function switchMode(m){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.mode===m));
-  document.getElementById('mode-d').classList.toggle('hidden',m!=='d');document.getElementById('mode-f').classList.toggle('hidden',m!=='f');}
+  document.getElementById('mode-d').classList.toggle('hidden',m!=='d');document.getElementById('mode-f').classList.toggle('hidden',m!=='f');
+  renderCandbar();}
 
 /* ===== GRID (design) ===== */
 function hasPatPhoto(id){return !!(EP[id]&&EP[id].photos&&EP[id].photos.length);}
 function hasFabPhoto(id){return !!(EF[id]&&EF[id].samples&&EF[id].samples.length);}
-function renderDChips(){document.getElementById('d-chips').innerHTML=D_CHIPS.map(([k,l])=>`<div class="chip2 ${ST.d.cat===k?'on':''}" onclick="ST.d.cat='${k}';renderGridD();">${l}</div>`).join('');}
+function renderDChips(){document.getElementById('d-chips').innerHTML=D_CHIPS.map(([k,l])=>`<div class="chip2 ${ST.d.cat===k?'on':''}" onclick="ST.d.cat='${k}';renderD();">${l}</div>`).join('');}
 function filtD(){const q=ST.d.q.trim().toLowerCase();
   const list=PATTERNS.filter(p=>(ST.d.cat==='all'||p.cat===ST.d.cat)&&(!q||(p.no+p.nm).toLowerCase().includes(q)));
   return list.slice().sort((a,b)=>hasPatPhoto(b.id)-hasPatPhoto(a.id));}
@@ -513,12 +655,13 @@ function renderGridD(){renderDChips();const list=filtD();
       ${hp?`<span class="photobadge">📷 作例あり</span>`:`<span class="photobadge muted">詳細のみ</span>`}
       <img class="pim" loading="lazy" src="${pThumb(p)}" ${FB(pThumb(p),pThumb(p))}>
       <div class="badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+      ${heartBtn('d',p.id)}
     </div>
     <div class="pc">${p.no}・${CATNAME[p.cat]}</div><div class="pnm">${p.nm}</div><div class="ppr">型紙 ${yen(p.pr)}（税込）</div></div>`;}).join('');
   h+=`<div class="ghost"><div><b>+1,000</b>点以上<br>絞り込み・検索で<br>すぐ見つかります</div></div>`;
   document.getElementById('d-grid').innerHTML=h;updMore('d',list.length,'型紙');}
 /* ===== GRID (fabric) ===== */
-function renderFChips(){document.getElementById('f-chips').innerHTML=F_CHIPS.map(([k,l])=>`<div class="chip2 ${ST.f.mat===k?'on':''}" onclick="ST.f.mat='${k}';renderGridF();">${l}</div>`).join('');}
+function renderFChips(){document.getElementById('f-chips').innerHTML=F_CHIPS.map(([k,l])=>`<div class="chip2 ${ST.f.mat===k?'on':''}" onclick="ST.f.mat='${k}';renderF();">${l}</div>`).join('');}
 function filtF(){const q=ST.f.q.trim().toLowerCase();
   const list=FABRICS.filter(f=>(ST.f.mat==='all'||f.mat===ST.f.mat)&&(!q||(f.code+f.nm+f.mat).toLowerCase().includes(q)));
   return list.slice().sort((a,b)=>hasFabPhoto(b.id)-hasFabPhoto(a.id));}
@@ -530,10 +673,36 @@ function renderGridF(){renderFChips();const list=filtF();
       ${hp?`<span class="photobadge">📷 作例あり</span>`:`<span class="photobadge muted">詳細のみ</span>`}
       <img class="pim" loading="lazy" src="${fSwatch(f.id)}" ${FB(fSwatch(f.id),fThumb(f))}>
       <div class="badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+      ${heartBtn('f',f.id)}
     </div>
     <div class="pc">${f.code}・${f.mat}</div><div class="pnm">${f.nm}</div><div class="ppr">${yen(f.unit)}／50cm・${f.w}</div></div>`;}).join('');
   h+=`<div class="ghost"><div><b>+2,000</b>点以上<br>素材・柄・色で<br>絞り込めます</div></div>`;
   document.getElementById('f-grid').innerHTML=h;updMore('f',list.length,'生地');}
+
+/* ===== GALLERY（作例写真から選ぶ） ===== */
+function renderD(){renderGridD();renderGalleryD();}
+function renderF(){renderGridF();renderGalleryF();}
+function updMoreG(m,len,label){const g=document.getElementById(m+'-pgrid');g.classList.toggle('collapsed',!ST[m].gExpanded);
+  const b=document.getElementById(m+'-pmore');b.style.display=len>8?'':'none';
+  b.textContent=ST[m].gExpanded?'表示を減らす ▲':`すべての${label}を見る（全 ${len} 枚）▼`;}
+function togMoreG(m){ST[m].gExpanded=!ST[m].gExpanded;m==='d'?renderGalleryD():renderGalleryF();
+  if(!ST[m].gExpanded)document.getElementById(m+'-pgrid').scrollIntoView({behavior:'smooth',block:'start'});}
+function renderGalleryD(){
+  const pats=filtD().filter(p=>hasPatPhoto(p.id));
+  const items=[];pats.forEach(p=>pPhotos(p.id).forEach(u=>items.push({u,p})));
+  document.getElementById('d-gnote').innerHTML=`実際にこの型紙で仕立てた<b>作品の写真</b>から選べます（デモでは作例のある型紙 ${pats.length} 型・写真 ${items.length} 枚）。写真をタップすると型紙の詳細が開きます。`;
+  document.getElementById('d-pgrid').innerHTML=items.length?items.map(({u,p})=>`<figure class="vistile ptile" onclick="openQV('p','${p.id}')">
+      <img loading="lazy" src="${u}" ${FB(u,pThumb(p))}><span class="noba">${p.no}・${yen(p.pr)}</span>${heartBtn('d',p.id)}</figure>`).join('')
+    :`<div class="visempty" style="grid-column:1/-1">該当する作例がありません。検索・カテゴリを変えてみてください。</div>`;
+  updMoreG('d',items.length,'作例');}
+function renderGalleryF(){
+  const fabs=filtF().filter(f=>hasFabPhoto(f.id));
+  const items=[];fabs.forEach(f=>fSamples(f.id).forEach(u=>items.push({u,f})));
+  document.getElementById('f-gnote').innerHTML=`実際にこの生地で仕立てた<b>作品の写真</b>から選べます（デモでは作例のある生地 ${fabs.length} 点・写真 ${items.length} 枚）。写真をタップすると生地の詳細が開きます。`;
+  document.getElementById('f-pgrid').innerHTML=items.length?items.map(({u,f})=>`<figure class="vistile ptile" onclick="openQV('f','${f.id}')">
+      <img loading="lazy" src="${u}" ${FB(u,fThumb(f))}><span class="noba">${f.code}・${yen(f.unit)}／50cm</span>${heartBtn('f',f.id)}</figure>`).join('')
+    :`<div class="visempty" style="grid-column:1/-1">該当する作例がありません。検索・素材を変えてみてください。</div>`;
+  updMoreG('f',items.length,'作例');}
 
 /* ===== QUICK VIEW ===== */
 let QV={type:null,id:null,imgs:[],idx:0};
@@ -555,6 +724,7 @@ function openQV(type,id){
             <div class="row"><span class="kk">用尺の目安</span><span class="vv">約${meters}m（生地幅で変動）</span></div>
             <div class="row"><span class="kk">必要な資材</span><span class="vv">生地・接着芯・ミシン糸ほか（自動提案）</span></div>
           </div>
+          <button class="qcand ${ST.d.cands.includes(id)?'on':''}" id="qv-cand" onclick="toggleCand('d','${id}')">${HEART}<span>${ST.d.cands.includes(id)?'候補に入れました（タップで外す）':'候補に入れて見比べる'}</span></button>
           <button class="qcta ${canPropose?'':'qcta-disabled'}" ${canPropose?'onclick="qvCommit()"':'disabled'}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>${canPropose?'このデザインで提案してもらう':'自動提案デモは対象外です'}</button>
           ${canPropose?'':'<div class="qvdisablenote">本デモの自動提案は、作例写真のある型紙10点のみご体験いただけます。一覧の緑「📷 作例あり」表示が対象です。</div>'}
         </div></div>
@@ -591,6 +761,7 @@ function openQV(type,id){
             <div class="row"><span class="kk">生地幅</span><span class="vv">${(EF[id]&&EF[id].width)||f.w}</span></div>
             <div class="row"><span class="kk">おすすめ</span><span class="vv">ワンピース・ブラウス・小物ほか</span></div>
           </div>
+          <button class="qcand ${ST.f.cands.includes(id)?'on':''}" id="qv-cand" onclick="toggleCand('f','${id}')">${HEART}<span>${ST.f.cands.includes(id)?'候補に入れました（タップで外す）':'候補に入れて見比べる'}</span></button>
           <button class="qcta ${canPropose?'':'qcta-disabled'}" ${canPropose?'onclick="qvCommit()"':'disabled'}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>${canPropose?'この生地で提案してもらう':'自動提案デモは対象外です'}</button>
           ${canPropose?'':'<div class="qvdisablenote">本デモの自動提案は、作例写真のある生地12点のみご体験いただけます。一覧の緑「📷 作例あり」表示が対象です。</div>'}
         </div></div>
@@ -741,10 +912,13 @@ function openCart(m){const st=ST[m],p=curPat(m),f=curFab(m),sh=SHIN[st.shin],met
 function mrow(n,q,im){return `<div class="mrow"><img class="mth" src="${im}" loading="lazy"><span class="ml">${n}</span><span class="mq">${q}</span></div>`;}
 function closeCart(){document.getElementById('cartov').classList.remove('show');}
 
-// init（既定で1点選択済み）
-renderGridD();renderGridF();
-ST.d.sel='n50';(function(){const p=PAT_BY.n50;ST.d.fab=REC_FAB[p.cat][0];ST.d.fq=FQ[p.cat];ST.d.parts={...PARTSDEF[p.cat]};})();renderGridD();renderProp('d',true);
-ST.f.sel='helena';ST.f.pat=MAT_DEF_PAT['麻'];ST.f.fq=FQ[PAT_BY[ST.f.pat].cat];ST.f.parts={...PARTSDEF[PAT_BY[ST.f.pat].cat]};renderGridF();renderProp('f',true);
+// init（未選択で開始。型紙/生地を選ぶと自動提案が現れる）
+renderD();renderF();renderCandbar();
+// スマホ：一括購入バーが見えている間は候補トレーを上にずらす
+const sbVis={};
+const sbObs=new IntersectionObserver(es=>{es.forEach(e=>sbVis[e.target.id]=e.isIntersecting&&e.boundingClientRect.height>0);
+  document.body.classList.toggle('setbar-vis',Object.values(sbVis).some(Boolean));});
+sbObs.observe(document.getElementById('d-setbar'));sbObs.observe(document.getElementById('f-setbar'));
 </script>
 </body>
 </html>
