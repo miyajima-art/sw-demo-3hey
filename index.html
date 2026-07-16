@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自動提案＆一括購入システム｜デモ（実装イメージ）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--linen:#f4f5f0;--paper:#fff;--ink:#333;--sub:#857f76;--line:#e4e6de;
+    --navy:#6f7d6f;--navy-d:#566356;--navy-soft:#edf1e9;--band:#dce3d8;
+    --rose:#a23a4c;--rose-soft:#f7ebed;--gold:#97887a;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--linen);color:var(--ink);
+    font-family:"Noto Sans JP","Hiragino Sans W3","Hiragino Kaku Gothic ProN",メイリオ,Meiryo,sans-serif;
+    line-height:1.8;-webkit-font-smoothing:antialiased;}
+  img{max-width:100%;}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 20px 90px;}
+  .topbar{background:#fff;border-bottom:1px solid var(--line);margin:0 -20px;padding:14px 24px;
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  .logoimg{height:34px;display:block;}
+  .logotext{font-size:20px;letter-spacing:.22em;font-weight:700;color:#6f7d6f;}
+  .band{background:var(--band);margin:0 -20px 22px;height:34px;display:flex;align-items:center;
+    justify-content:center;gap:26px;font-size:11px;color:#4c574c;letter-spacing:.05em;overflow-x:auto;}
+  .band span{opacity:.85;white-space:nowrap;}
+  .demobadge{font-size:11px;color:#8a2d3c;background:#f7ebed;border:1px solid #e4c3c9;
+    padding:4px 12px;border-radius:20px;white-space:nowrap;}
+  h1{font-size:26px;margin:18px 0 6px;font-weight:700;line-height:1.45;}
+  .lead{color:var(--sub);font-size:14px;margin:0 0 22px;}
+  .tabs{display:flex;gap:10px;margin-bottom:22px;}
+  .tab{flex:1;border:1px solid var(--line);background:#fff;border-radius:14px;padding:14px 16px;
+    cursor:pointer;transition:.18s;display:flex;align-items:center;gap:12px;text-align:left;}
+  .tab .num{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;color:#fff;flex:none;}
+  .tab.d .num{background:var(--navy);} .tab.f .num{background:var(--rose);}
+  .tab .tt{font-weight:700;font-size:15px;} .tab .ts{font-size:11.5px;color:var(--sub);}
+  .tab.active.d{border-color:var(--navy);box-shadow:0 4px 16px rgba(111,125,111,.16);}
+  .tab.active.f{border-color:var(--rose);box-shadow:0 4px 16px rgba(162,58,76,.14);}
+  .tab:not(.active){opacity:.6;}
+  .step{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#fff;border-radius:20px;padding:4px 14px;margin:0 0 14px;}
+  .accent-d .step{background:var(--navy);} .accent-f .step{background:var(--rose);}
+  .step .n{background:rgba(255,255,255,.28);border-radius:50%;width:18px;height:18px;display:grid;place-items:center;font-size:11px;}
+  .tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px;}
+  .search{flex:1;min-width:230px;display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:10px 15px;}
+  .search svg{flex:none;stroke:var(--sub);} .search input{border:none;outline:none;font:inherit;font-size:14px;width:100%;background:transparent;color:var(--ink);}
+  .count{font-size:12px;color:var(--sub);white-space:nowrap;} .count b{color:var(--navy);font-size:14px;} .accent-f .count b{color:var(--rose);}
+  .photonote{display:inline-block;margin-left:10px;font-size:11px;color:#4a7a4a;background:#e9f1e9;border-radius:20px;padding:2px 10px;}
+  .chips2{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .chip2{border:1.4px solid var(--line);background:#fff;border-radius:20px;padding:6px 15px;font-size:12.5px;cursor:pointer;color:var(--sub);transition:.14s;}
+  .accent-d .chip2.on{background:var(--navy);border-color:var(--navy);color:#fff;} .accent-f .chip2.on{background:var(--rose);border-color:var(--rose);color:#fff;}
+  /* grid */
+  .grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:14px;}
+  .pcard{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:8px;cursor:pointer;transition:.16s;position:relative;overflow:hidden;}
+  .pcard:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(90,80,50,.13);}
+  .pcard .imgwrap{position:relative;}
+  .pcard .pim{width:100%;aspect-ratio:3/4;object-fit:contain;background:#f6f5f0;border-radius:9px;display:block;}
+  .pcard.fab .pim{object-fit:cover;}
+  .pcard .qvhint{position:absolute;top:8px;left:8px;background:rgba(51,51,51,.78);color:#fff;font-size:10.5px;
+    padding:3px 9px;border-radius:20px;opacity:.95;transition:.16s;display:flex;align-items:center;gap:4px;}
+  .pcard:hover .qvhint{opacity:1;background:rgba(51,51,51,.92);}
+  .pcard .photobadge{position:absolute;bottom:8px;left:8px;background:#4a7a4a;color:#fff;font-size:9.5px;font-weight:700;
+    padding:3px 8px;border-radius:20px;display:flex;align-items:center;gap:3px;box-shadow:0 2px 6px rgba(0,0,0,.15);}
+  .pcard .photobadge.muted{background:rgba(154,148,136,.9);}
+  .pcard .pc{font-size:10.5px;color:var(--gold);font-weight:600;margin-top:7px;}
+  .pcard .pnm{font-size:12px;font-weight:600;line-height:1.35;margin:1px 0 4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.7em;}
+  .pcard .ppr{font-size:11.5px;color:var(--sub);}
+  .pcard .badge{position:absolute;top:9px;right:9px;width:22px;height:22px;border-radius:50%;background:#fff;border:1.5px solid var(--line);display:grid;place-items:center;opacity:0;transition:.14s;}
+  .accent-d .pcard.sel{border-color:var(--navy);box-shadow:0 0 0 2px var(--navy) inset;} .accent-f .pcard.sel{border-color:var(--rose);box-shadow:0 0 0 2px var(--rose) inset;}
+  .pcard.sel .badge{opacity:1;} .accent-d .pcard.sel .badge{background:var(--navy);border-color:var(--navy);} .accent-f .pcard.sel .badge{background:var(--rose);border-color:var(--rose);}
+  .ghost{display:grid;place-items:center;border:1.5px dashed #cfd4c8;border-radius:14px;color:var(--sub);font-size:12px;text-align:center;padding:12px;line-height:1.6;}
+  .ghost b{font-size:20px;color:var(--navy);display:block;} .accent-f .ghost b{color:var(--rose);}
+  /* proposal */
+  .prop{margin-top:26px;}
+  .propbox{max-width:940px;}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 8px 26px rgba(90,80,50,.07);}
+  /* set strip / usetags / anim */
+  .usetag{display:inline-block;font-size:10px;background:#eef1ea;color:#5c6a5c;border-radius:4px;padding:0 7px;margin-right:4px;font-weight:700;}
+  .colname{font-size:11px;color:var(--sub);margin-left:6px;}
+  .setstrip{width:100%;display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding-bottom:13px;border-bottom:1px dashed rgba(0,0,0,.1);margin-bottom:13px;}
+  .setstrip .sl{font-size:11px;color:var(--sub);width:100%;margin-bottom:2px;font-weight:700;letter-spacing:.03em;}
+  .si{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:4px 10px 4px 4px;}
+  .si img{width:36px;height:36px;object-fit:cover;border-radius:7px;background:#f6f5f0;}
+  .si b{font-size:11px;font-weight:700;white-space:nowrap;}
+  .plus{color:var(--gold);font-weight:700;font-size:14px;}
+  @keyframes rise{from{opacity:0;transform:translateY(9px);}to{opacity:1;transform:none;}}
+  .panel.anim .vishead,.panel.anim .fabcard,.panel.anim .vissec{animation:rise .38s ease both;}
+  .panel.anim .visgrid .vistile{animation:rise .42s ease both;}
+  .panel.anim .visgrid .vistile:nth-child(2){animation-delay:.06s;}
+  .panel.anim .visgrid .vistile:nth-child(3){animation-delay:.12s;}
+  .panel.anim .visgrid .vistile:nth-child(4){animation-delay:.18s;}
+  .panel.anim .kit .slot{animation:rise .42s ease both;}
+  .panel.anim .kit .slot:nth-child(2){animation-delay:.08s;}
+  .panel.anim .kit .slot:nth-child(3){animation-delay:.16s;}
+  .panel.anim .kit .slot:nth-child(4){animation-delay:.24s;}
+  .whyh{font-weight:700;font-size:11.5px;margin-bottom:4px;color:#55604f;}
+  .accent-f .whyh{color:#8a3444;}
+  .why .wl{margin:2px 0;}
+  /* kit */
+  .kit{margin-top:20px;border-top:1px solid var(--line);padding-top:8px;}
+  .slot{border-top:1px dashed var(--line);padding:16px 2px 6px;}
+  .slot:first-child{border-top:none;}
+  .item{display:flex;gap:16px;align-items:flex-start;}
+  .fimg{width:118px;height:140px;object-fit:cover;border-radius:12px;flex:none;background:#f6f5f0;}
+  .fimg.contain{object-fit:contain;}
+  .mimg{width:76px;height:76px;object-fit:cover;border-radius:10px;flex:none;background:#f6f5f0;}
+  .nblock{width:76px;height:76px;border-radius:10px;flex:none;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:600;text-align:center;}
+  .imeta{flex:1;min-width:0;}
+  .kind{font-size:11px;font-weight:700;letter-spacing:.03em;color:var(--gold);display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+  .kind .rec{background:#e9f1e9;color:#4a7a4a;border-radius:4px;font-size:10px;padding:1px 7px;}
+  .inm{font-size:15px;font-weight:700;line-height:1.4;margin:2px 0 4px;}
+  .idesc{font-size:12px;color:var(--sub);margin:0 0 8px;}
+  .ip{font-size:15px;font-weight:700;white-space:nowrap;}
+  .priceline{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px;}
+  .stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:9px;overflow:hidden;}
+  .stepper button{border:none;background:#f1f3ec;width:32px;height:30px;font-size:17px;cursor:pointer;color:var(--navy);}
+  .stepper button:hover{background:#e5e9dd;} .stepper .val{padding:0 14px;font-size:14px;font-weight:700;min-width:72px;text-align:center;}
+  .uom{font-size:11.5px;color:var(--sub);margin-left:8px;} .yakko{display:inline-block;font-size:11px;color:#4a7a4a;background:#e9f1e9;border-radius:5px;padding:1px 9px;}
+  .cols{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px;align-items:center;}
+  .cols .clab{font-size:10.5px;color:var(--sub);width:100%;margin-bottom:1px;}
+  .col{width:38px;height:38px;border-radius:9px;object-fit:cover;cursor:pointer;border:2px solid transparent;transition:.12s;}
+  .col.on{border-color:var(--navy);box-shadow:0 0 0 2px #fff inset;}
+  .swrap{margin-top:12px;}
+  .swrap .lbl{font-size:11px;color:#a49a8b;margin-bottom:7px;}
+  .swrow{display:flex;gap:10px;overflow-x:auto;padding:2px 0 6px;}
+  .sw{width:64px;flex:none;cursor:pointer;text-align:center;}
+  .sw img{width:64px;height:64px;object-fit:cover;border-radius:12px;border:2px solid var(--line);transition:.12s;display:block;}
+  .accent-d .sw.on img{border-color:var(--navy);} .accent-f .sw.on img{border-color:var(--rose);}
+  .sw .sn{font-size:9.5px;color:var(--sub);line-height:1.2;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .sw .sp{font-size:9.5px;color:var(--gold);}
+  .parts{display:flex;flex-direction:column;gap:2px;}
+  .part{display:flex;gap:12px;align-items:center;padding:10px 2px;border-top:1px dashed var(--line);}
+  .part:first-child{border-top:none;}
+  .cbx{width:24px;height:24px;border-radius:6px;border:1.6px solid var(--line);flex:none;cursor:pointer;display:grid;place-items:center;background:#fff;transition:.14s;}
+  .cbx svg{width:14px;height:14px;opacity:0;} .accent-d .cbx.on{background:var(--navy);border-color:var(--navy);} .accent-f .cbx.on{background:var(--rose);border-color:var(--rose);} .cbx.on svg{opacity:1;}
+  .part.off{opacity:.5;} .part .pmeta{flex:1;min-width:0;} .part .pk{font-size:11px;color:var(--gold);font-weight:700;} .part .pn{font-size:13px;font-weight:600;} .part .pp{font-size:13px;font-weight:700;text-align:right;}
+  .pimg{width:54px;height:54px;object-fit:cover;border-radius:10px;flex:none;background:#f6f5f0;cursor:zoom-in;}
+  .detailbtn{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:#fff;cursor:pointer;font-weight:700;
+    border:none;border-radius:20px;padding:5px 13px;white-space:nowrap;margin:5px 0 2px;transition:.14s;}
+  .detailbtn svg{width:11px;height:11px;flex:none;}
+  .accent-d .detailbtn{background:var(--navy);} .accent-f .detailbtn{background:var(--rose);}
+  .detailbtn:hover{filter:brightness(1.1);transform:translateY(-1px);}
+  .part .stepper button{width:28px;height:27px;font-size:15px;} .part .stepper .val{min-width:44px;padding:0 8px;}
+  .partright{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:none;}
+  .why{background:#f3f5ee;border-left:3px solid var(--navy);border-radius:0 8px 8px 0;font-size:12px;color:#6b7268;padding:10px 14px;margin:16px 0 2px;}
+  .accent-f .why{border-left-color:var(--rose);}
+  .setbar{margin-top:16px;border-radius:16px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;position:sticky;bottom:12px;}
+  .accent-d .setbar{background:var(--navy-soft);border:1px solid #d3ddce;box-shadow:0 6px 20px rgba(90,90,60,.12);}
+  .accent-f .setbar{background:var(--rose-soft);border:1px solid #ecd2d8;box-shadow:0 6px 20px rgba(120,60,70,.12);}
+  .setbar .stotal small{font-size:11.5px;color:var(--sub);display:block;} .setbar .stotal b{font-size:26px;} .setbar .stotal .tax{font-size:12px;color:var(--sub);font-weight:400;margin-left:4px;} .setbar .stotal .cnt{font-size:11.5px;color:var(--sub);}
+  .cta{border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;padding:15px 28px;cursor:pointer;transition:.16s;display:flex;align-items:center;gap:9px;}
+  .cta:hover{filter:brightness(1.06);transform:translateY(-1px);}
+  .accent-d .cta{background:var(--navy);box-shadow:0 6px 16px rgba(111,125,111,.32);} .accent-f .cta{background:var(--rose);box-shadow:0 6px 16px rgba(162,58,76,.3);}
+  .setnote{font-size:11px;color:var(--sub);margin:12px 2px 0;}
+  /* modals */
+  .ov{position:fixed;inset:0;background:rgba(40,40,33,.55);display:none;place-items:center;z-index:60;padding:20px;backdrop-filter:blur(3px);overflow-y:auto;}
+  .ov.show{display:grid;}
+  .qv{background:#fff;border-radius:20px;max-width:880px;width:100%;box-shadow:0 24px 70px rgba(0,0,0,.34);animation:pop .26s ease;overflow:hidden;margin:auto;}
+  @keyframes pop{from{transform:scale(.96) translateY(10px);opacity:0;}to{transform:none;opacity:1;}}
+  .qvhead{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line);}
+  .qvhead .t{font-size:12px;color:var(--gold);font-weight:700;}
+  .qvclose{border:none;background:#f1f1ec;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;color:var(--sub);}
+  .qvbody{display:grid;grid-template-columns:1.05fr 1fr;gap:22px;padding:22px;}
+  .qvmain{border-radius:14px;overflow:hidden;background:#f6f5f0;}
+  .qvmain img{width:100%;height:400px;object-fit:cover;display:block;}
+  .qvthumbs{display:flex;gap:8px;margin-top:10px;overflow-x:auto;}
+  .qvthumbs img{width:66px;height:80px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid transparent;flex:none;}
+  .qvthumbs img.on{border-color:var(--navy);}
+  .qvinfo .qcode{font-size:12px;color:var(--gold);font-weight:700;}
+  .qvinfo h2{font-size:21px;margin:3px 0 6px;font-weight:700;line-height:1.4;}
+  .qvinfo .qprice{font-size:17px;font-weight:700;margin-bottom:12px;}
+  .qspec{display:flex;flex-direction:column;gap:8px;margin:12px 0;}
+  .qspec .row{display:flex;gap:10px;font-size:13px;border-bottom:1px dashed var(--line);padding-bottom:7px;}
+  .qspec .row .kk{color:var(--sub);width:88px;flex:none;} .qspec .row .vv{font-weight:600;}
+  .qdesc{font-size:13px;color:#5f5a52;line-height:1.85;margin:6px 0 14px;}
+  .qcta{width:100%;border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;padding:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;}
+  .accent-d .qcta{background:var(--navy);} .accent-f .qcta{background:var(--rose);}
+  .qcta:hover{filter:brightness(1.06);}
+  .qcta.qcta-disabled{background:#e2e0d8 !important;color:#9a9488;cursor:not-allowed;box-shadow:none;}
+  .qcta.qcta-disabled:hover{filter:none;}
+  .qvdisablenote{font-size:11.5px;color:#a89f8f;margin-top:10px;text-align:center;line-height:1.7;background:#f8f7f2;border-radius:10px;padding:9px 12px;}
+  .qcolors{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px;}
+  .qcolors .qc{text-align:center;cursor:pointer;}
+  .qcolors .qc img{width:44px;height:44px;object-fit:cover;border-radius:9px;border:2px solid transparent;display:block;}
+  .qcolors .qc.on img{border-color:var(--navy);}
+  .qcolors .qc span{font-size:9px;color:var(--sub);}
+  .qvnote{font-size:11px;color:#a89f8f;padding:0 22px 18px;}
+  .modal{background:#fff;border-radius:20px;max-width:440px;width:100%;padding:26px;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:pop .25s ease;margin:auto;}
+  .mcheck{width:52px;height:52px;border-radius:50%;background:#e8f3ec;display:grid;place-items:center;margin:0 auto 12px;}
+  .modal h3{text-align:center;margin:0 0 4px;font-size:18px;} .modal .msub{text-align:center;color:var(--sub);font-size:12.5px;margin:0 0 16px;}
+  .mlist{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px;}
+  .mrow{display:flex;align-items:center;gap:9px;padding:8px 13px;font-size:12.5px;border-top:1px solid #f0efe8;} .mrow:first-child{border-top:none;} .mrow .ml{flex:1;min-width:0;} .mrow .mq{color:var(--sub);font-size:11px;white-space:nowrap;}
+  .mth{width:32px;height:32px;object-fit:cover;border-radius:7px;flex:none;background:#f6f5f0;}
+  .mtotal{display:flex;justify-content:space-between;padding:11px 13px;background:#f3f5ee;font-weight:700;}
+  .mtech{font-size:10.5px;color:#a49a8b;background:#f8f8f3;border:1px dashed var(--line);border-radius:10px;padding:9px 12px;margin-bottom:14px;line-height:1.55;} .mtech code{background:#ebe9df;padding:1px 5px;border-radius:4px;}
+  .mclose{width:100%;border:none;background:var(--ink);color:#fff;border-radius:11px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;}
+  /* mode-specific visual grid */
+  .vishead{display:flex;gap:14px;align-items:center;margin-bottom:14px;}
+  .vhthumb{width:58px;height:72px;object-fit:contain;background:#f6f5f0;border-radius:9px;flex:none;}
+  .vhk{font-size:11px;color:var(--gold);font-weight:700;letter-spacing:.03em;}
+  .vhname{font-size:17px;font-weight:700;line-height:1.35;}
+  .vhsub{font-size:12px;color:var(--sub);}
+  .vissec{font-size:14px;font-weight:700;color:var(--navy-d);margin:8px 0 12px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .accent-f .vissec{color:#8a3444;}
+  .visnote{font-size:11px;color:var(--sub);font-weight:400;}
+  .visgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
+  .vistile{margin:0;position:relative;border-radius:13px;overflow:hidden;cursor:zoom-in;background:#f6f5f0;aspect-ratio:3/4;box-shadow:0 3px 12px rgba(90,80,50,.07);}
+  .vistile img{width:100%;height:100%;object-fit:cover;display:block;transition:.3s;}
+  .vistile:hover img{transform:scale(1.06);}
+  .noba{position:absolute;left:8px;bottom:8px;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(51,51,51,.82);}
+  .accent-d .noba{background:rgba(86,99,86,.92);} .accent-f .noba{background:rgba(138,45,60,.92);}
+  .visempty{padding:28px;text-align:center;color:var(--sub);font-size:13px;background:#f6f5f0;border-radius:13px;}
+  .fabcard{display:flex;gap:16px;align-items:flex-start;background:#faf9f5;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:16px;}
+  .fcimg{width:130px;height:156px;object-fit:cover;border-radius:12px;flex:none;cursor:zoom-in;background:#f6f5f0;}
+  .fcinfo{flex:1;min-width:0;}
+  .vhdesc{font-size:12px;color:#6b6459;margin:6px 0 9px;line-height:1.7;}
+  .fccols{display:flex;gap:7px;flex-wrap:wrap;}
+  .fccols .col{width:34px;height:34px;border-radius:8px;object-fit:cover;cursor:pointer;border:2px solid transparent;}
+  .accent-f .fccols .col.on{border-color:var(--rose);} .accent-d .fccols .col.on{border-color:var(--navy);}
+  .lbox{max-width:560px;width:100%;position:relative;}
+  .lbclose{position:absolute;top:-42px;right:0;border:none;background:rgba(255,255,255,.9);color:#333;border-radius:20px;padding:7px 15px;font-size:13px;font-weight:700;cursor:pointer;}
+  .lbox img{width:100%;border-radius:16px;display:block;box-shadow:0 20px 60px rgba(0,0,0,.45);}
+  .lbcap{color:#fff;text-align:center;margin-top:12px;font-size:13px;}
+  .foot{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);font-size:11px;color:var(--sub);line-height:1.7;}
+  .hidden{display:none;}
+  .morebtn{display:none;width:100%;margin:12px 0 2px;border:1.5px solid var(--line);background:#fff;border-radius:12px;
+    padding:13px;font:inherit;font-size:13.5px;font-weight:700;color:var(--navy-d);cursor:pointer;
+    align-items:center;justify-content:center;gap:7px;}
+  .accent-f .morebtn{color:#8a3444;}
+  button,.chip2,.pcard,.cbx,.col,.sw,.tab,.vistile,.qc{touch-action:manipulation;-webkit-tap-highlight-color:rgba(51,51,51,.06);}
+  @media(max-width:820px){.tab .ts{display:none;}h1{font-size:21px;}.grid2{grid-template-columns:repeat(auto-fill,minmax(136px,1fr));}
+    .qvbody{grid-template-columns:1fr;}.qvmain img{height:300px;}.heroC{grid-template-columns:1fr;}.heroB{grid-template-columns:1fr 1fr;}}
+  /* ===== スマホ最適化（640px以下・PC表示には影響しない） ===== */
+  @media(max-width:640px){
+    .wrap{padding:0 14px 40px;}
+    .topbar{margin:0 -14px;padding:11px 16px;}
+    .logoimg{height:27px;}
+    .demobadge{font-size:10px;padding:3px 10px;}
+    .band{margin:0 -14px 16px;justify-content:flex-start;padding:0 16px;gap:18px;scrollbar-width:none;}
+    .band::-webkit-scrollbar{display:none;}
+    h1{font-size:20px;line-height:1.5;margin:14px 0 6px;}
+    .lead{font-size:12.5px;line-height:1.75;margin-bottom:16px;}
+    .tabs{gap:8px;margin-bottom:16px;}
+    .tab{padding:12px 10px;gap:8px;border-radius:12px;}
+    .tab .num{width:22px;height:22px;font-size:12px;}
+    .tab .tt{font-size:13px;}
+    .step{font-size:11.5px;padding:5px 13px;}
+    .tools{gap:8px;margin-bottom:10px;}
+    .search{min-width:0;width:100%;padding:12px 14px;}
+    .search input{font-size:16px;}
+    .count{font-size:11.5px;}
+    .chips2{flex-wrap:nowrap;overflow-x:auto;margin:0 -14px 14px;padding:2px 14px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+    .chips2::-webkit-scrollbar{display:none;}
+    .chip2{flex:none;white-space:nowrap;padding:9px 16px;font-size:13px;}
+    .grid2{grid-template-columns:repeat(2,1fr);gap:10px;}
+    .grid2.collapsed>*:nth-child(n+9){display:none;}
+    .morebtn{display:flex;}
+    .pcard .pnm{font-size:12.5px;}
+    .pcard .pc{font-size:11px;}
+    .pcard .ppr{font-size:12px;}
+    .pcard .qvhint{font-size:10px;}
+    /* 提案パネル */
+    .panel{padding:16px 14px;border-radius:16px;}
+    .vishead{gap:11px;}
+    .vhname{font-size:15px;}
+    .visgrid{grid-template-columns:repeat(2,1fr);gap:10px;}
+    .fabcard{gap:12px;padding:12px;}
+    .fcimg{width:96px;height:118px;}
+    .item{gap:10px;}
+    .fimg{width:92px;height:112px;}
+    .mimg{width:60px;height:60px;}
+    .nblock{width:60px;height:60px;}
+    .inm{font-size:14px;}
+    .idesc{font-size:11.5px;}
+    .ip{font-size:13.5px;}
+    .kind{font-size:10.5px;}
+    .detailbtn{font-size:12px;padding:7px 14px;}
+    .priceline{flex-wrap:wrap;row-gap:6px;}
+    .stepper button{width:40px;height:38px;}
+    .stepper .val{min-width:60px;font-size:14px;}
+    .sw{width:68px;} .sw img{width:68px;height:68px;}
+    .sw .sn,.sw .sp{font-size:10px;}
+    .col{width:40px;height:40px;}
+    .cbx{width:28px;height:28px;border-radius:7px;}
+    .cbx svg{width:16px;height:16px;}
+    .part{flex-wrap:wrap;row-gap:8px;gap:10px;}
+    .part .pmeta{flex:1;min-width:140px;}
+    .part .pn{font-size:12.5px;}
+    .partright{flex-direction:row;width:100%;justify-content:space-between;align-items:center;padding-left:38px;}
+    .part .stepper button{width:36px;height:34px;}
+    .part .stepper .val{min-width:44px;}
+    .why{font-size:11.5px;padding:10px 12px;}
+    /* 追従カートバー：全幅・safe-area対応・CTA全幅 */
+    .setbar{margin-left:-14px;margin-right:-14px;border-radius:16px 16px 0 0;bottom:0;
+      padding:12px 14px calc(10px + env(safe-area-inset-bottom));gap:8px;}
+    .setstrip{flex-wrap:nowrap;overflow-x:auto;padding-bottom:9px;margin-bottom:9px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+    .setstrip::-webkit-scrollbar{display:none;}
+    .setstrip .sl{display:none;}
+    .si{flex:none;}
+    .si img{width:30px;height:30px;}
+    .si b{font-size:10.5px;}
+    .setbar .stotal{width:100%;}
+    .setbar .stotal small{display:inline;margin-right:6px;}
+    .setbar .stotal b{font-size:22px;}
+    .cta{width:100%;justify-content:center;padding:15px 20px;font-size:15px;}
+    .setnote{margin-top:10px;}
+    /* クイックビュー＝ボトムシート */
+    #qvov{padding:36px 0 0;place-items:end center;}
+    .qv{max-width:100%;margin:0;border-radius:20px 20px 0 0;max-height:calc(100dvh - 36px);overflow-y:auto;animation:sheetup .3s ease;}
+    @keyframes sheetup{from{transform:translateY(44px);opacity:0;}to{transform:none;opacity:1;}}
+    .qvhead{position:sticky;top:0;background:#fff;z-index:2;padding:12px 16px;}
+    .qvclose{width:36px;height:36px;}
+    .qvbody{grid-template-columns:1fr;gap:14px;padding:16px;}
+    .qvmain img{height:min(340px,42vh);}
+    .qvthumbs img{width:60px;height:74px;}
+    .qvinfo h2{font-size:18px;}
+    .qcta{position:sticky;bottom:0;z-index:2;box-shadow:0 -6px 18px rgba(0,0,0,.08);}
+    .qvnote{padding:0 16px 16px;}
+    /* カート確認・ライトボックス */
+    .ov{padding:14px;}
+    .modal{padding:20px 18px;}
+    .lbclose{top:10px;right:10px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <img class="logoimg" src="https://www.swany-kamakura.co.jp/onlineshop/img/com/swany_logo2.svg" alt="kamakura SWANY"
+      onerror="this.onerror=null;this.outerHTML='<div class=&quot;logotext&quot;>kamakura SWANY</div>'">
+    <div class="demobadge">● デモ／提案用モック（実際の画面ではありません）</div>
+  </div>
+  <div class="band"><span>生地をさがす</span><span>定番生地</span><span>アウトレット</span><span>輸入生地</span><span>小物・接着芯</span><span>型紙・寸法図</span><span>キット</span><span>手作り応援</span></div>
+
+  <h1>デザインも、生地も、すべておまかせ。<br>自動提案＆一括購入システム</h1>
+  <p class="lead">1,000点を超える型紙、数千点の生地から、<b>写真で見て選ぶだけ</b>。必要な生地・接着芯・副資材を必要な分だけ自動でご提案し、まとめてカートへ。カードを開くと完成品の写真・作例・色展開で確かめられます。</p>
+
+  <div class="tabs">
+    <div class="tab d active" data-mode="d" onclick="switchMode('d')"><span class="num">1</span><span><span class="tt">デザインから入る</span><br><span class="ts">作りたい型紙をさがす → 最適な組み合わせを自動提案</span></span></div>
+    <div class="tab f" data-mode="f" onclick="switchMode('f')"><span class="num">2</span><span><span class="tt">生地から入る</span><br><span class="ts">気になる生地をさがす → 最適な組み合わせを自動提案</span></span></div>
+  </div>
+
+  <section id="mode-d" class="accent-d">
+    <div class="step"><span class="n">1</span>型紙をさがして選ぶ（カードで詳細確認）</div>
+    <div class="tools"><label class="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="d-q" type="text" placeholder="型紙をさがす（例：ワンピース、No.50、ブラウス）" oninput="ST.d.q=this.value;renderGridD();"></label>
+      <div class="count" id="d-count"></div></div>
+    <div class="chips2" id="d-chips"></div>
+    <div class="grid2" id="d-grid"></div>
+    <button class="morebtn" id="d-more" onclick="togMore('d')"></button>
+    <div class="prop" id="d-prop">
+      <div class="step" style="margin-top:28px"><span class="n">2</span>自動提案を確認・調整</div>
+      <div class="propbox"><div class="panel" id="d-panel"></div><div id="d-setbar"></div>
+        <p class="setnote">※ 数量・金額は概算（実装イメージ）。用尺の目安は各型紙の用尺表に基づき確定します。作例写真は実際にその生地で仕立てた作品です。</p></div>
+    </div>
+  </section>
+
+  <section id="mode-f" class="accent-f hidden">
+    <div class="step"><span class="n">1</span>生地をさがして選ぶ（カードで詳細確認）</div>
+    <div class="tools"><label class="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="f-q" type="text" placeholder="生地をさがす（例：リネン、Helena、ウール）" oninput="ST.f.q=this.value;renderGridF();"></label>
+      <div class="count" id="f-count"></div></div>
+    <div class="chips2" id="f-chips"></div>
+    <div class="grid2" id="f-grid"></div>
+    <button class="morebtn" id="f-more" onclick="togMore('f')"></button>
+    <div class="prop" id="f-prop">
+      <div class="step" style="margin-top:28px"><span class="n">2</span>自動提案を確認・調整</div>
+      <div class="propbox"><div class="panel" id="f-panel"></div><div id="f-setbar"></div>
+        <p class="setnote">※ 数量・金額は概算（実装イメージ）。用尺の目安は各型紙の用尺表に基づき確定します。作例写真は実際にその生地で仕立てた作品です。</p></div>
+    </div>
+  </section>
+
+  <div class="foot">
+    このモックは株式会社スワニー様への提案用に作成した「自動提案＆一括購入システム」の画面イメージです。掲載の商品・写真・作例・色展開・品番・価格は swany.jp／swany-kamakura.co.jp の実在商品を参照しています。提案される組み合わせ・数量・金額は概算であり、実際の仕様・在庫・条件により変動します。<br>
+    技術構成：メイクショップ「カゴだけmakeshop」機能（1回のカート投入で最大50商品）＋クリエイターモードのJS埋め込み＋外部レコメンドエンジン。デザイン・書体は swany.jp のブランド（セージグリーン／Noto Sans JP）に準拠。
+  </div>
+</div>
+
+<!-- quick view -->
+<div class="ov" id="qvov" onclick="if(event.target===this)closeQV()"><div class="qv" id="qv"></div></div>
+<!-- cart -->
+<div class="ov" id="cartov" onclick="if(event.target===this)closeCart()">
+  <div class="modal">
+    <div class="mcheck"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#2e9e63" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+    <h3>推奨セットをカートに追加しました</h3><p class="msub">必要なものが、必要な分だけ一度でそろいました。</p>
+    <div class="mlist" id="m-list"></div><div class="mtech" id="m-tech"></div>
+    <button class="mclose" onclick="closeCart()">続けて見る</button>
+  </div>
+</div>
+<!-- lightbox -->
+<div class="ov" id="lbov" onclick="closeLB()"><div class="lbox" onclick="event.stopPropagation()"><button class="lbclose" onclick="closeLB()">✕ 閉じる</button><img id="lbimg" alt=""><div class="lbcap" id="lbcap"></div></div></div>
+
+<script>
+const IMG="https://makeshop-multi-images.akamaized.net/gmosp1040/itemimages/";
+const PATTERNS=[
+ {id:"n150",no:"No.150",nm:"セーラーカラーのブラウス＆ワンピース",pr:792,im:"0000000428273_FbbEOSa.jpg",cat:"op"},
+ {id:"n55",no:"No.55",nm:"Vネックのフレンチスリーブワンピース",pr:712,im:"0000000294223_IRLAmNk.jpg",cat:"op"},
+ {id:"n19",no:"No.19",nm:"ラウンドネックのフレンチスリーブワンピース＆ブラウス",pr:712,im:"0000000424943_apVTwZS.jpg",cat:"op"},
+ {id:"n21",no:"No.21",nm:"小さな衿のフレンチスリーブワンピース",pr:712,im:"0000000424353_KmdTu1L.jpg",cat:"op"},
+ {id:"n6015",no:"No.6015",nm:"小さなシャツカラーのタックワンピース",pr:872,im:"0000000419543_6eK6Tda.jpg",cat:"op"},
+ {id:"n12",no:"No.12",nm:"Vネックのプリーツワンピース＆ブラウス",pr:872,im:"0000000235733_yh18Afd.jpg",cat:"op"},
+ {id:"n50",no:"No.50",nm:"前あきダブルボタンの衿付きワンピース",pr:990,im:"000000029423_9NI1U96.jpg",cat:"op"},
+ {id:"n86",no:"No.86",nm:"Ａラインのノースリーブワンピース",pr:890,im:"000000037062_0a4OJew.jpg",cat:"op"},
+ {id:"n6102",no:"No.6102",nm:"ドルマンスリーブプルオーバー",pr:712,im:"0000000403833_in0WBmJ.jpg",cat:"bl"},
+ {id:"n100",no:"No.100",nm:"Vネックヨークのブラウス",pr:712,im:"0000000426763_vY6DGZw.jpg",cat:"bl"},
+ {id:"n119",no:"No.119",nm:"ドロップショルダーのコンパクトブラウス",pr:632,im:"0000000426783_VHhCvXz.jpg",cat:"bl"},
+ {id:"n6104",no:"No.6104",nm:"ヨーク切替のラウンドラインブラウス",pr:632,im:"0000000423643_YtK5CYA.jpg",cat:"bl"},
+ {id:"n128",no:"No.128",nm:"変わりラウンドカットのスタンドカラーブラウス",pr:890,im:"000000035075_f9Ocbp0.jpg",cat:"bl"},
+ {id:"n817",no:"No.817",nm:"裾タック入りバルーンジャンパースカート",pr:712,im:"0000000239173_lQxfJK7.jpg",cat:"sk"},
+ {id:"n317",no:"No.317",nm:"Aライン巻きスカート",pr:792,im:"0000000424873_4iOch7t.jpg",cat:"sk"},
+ {id:"n312",no:"No.312",nm:"1タックスカート",pr:632,im:"0000000277123_yxaAqqq.jpg",cat:"sk"},
+ {id:"n335",no:"No.335",nm:"バルーンシルエットのパンツ風スカート",pr:712,im:"0000000239153_0yzLZ6B.jpg",cat:"sk"},
+ {id:"n822",no:"No.822",nm:"脇ギャザーのバルーンジャンパースカート",pr:712,im:"0000000413433_qUhYAzQ.jpg",cat:"sk"},
+ {id:"n372",no:"No.372",nm:"ワイド巾ベルトの巻き風スカート",pr:792,im:"0000000413853_lB1YVjc.jpg",cat:"sk"},
+ {id:"n403",no:"No.403",nm:"タック入りワイドパンツ",pr:712,im:"0000000426843_mkEOXPG.jpg",cat:"pt"},
+ {id:"n404",no:"No.404",nm:"脇接ぎなしのリラックスストレートパンツ",pr:712,im:"0000000239183_nfmeh4x.jpg",cat:"pt"},
+ {id:"n441",no:"No.441",nm:"裾ダーツのゆったりパンツ",pr:712,im:"0000000238843_Ouj8iAs.jpg",cat:"pt"},
+ {id:"n402",no:"No.402",nm:"サイドポケット付きワイドパンツ",pr:712,im:"0000000238093_gd9xGEg.jpg",cat:"pt"},
+ {id:"n444",no:"No.444",nm:"ぶかぶかベイカーパンツ",pr:632,im:"0000000293273_wwIWfZ7.jpg",cat:"pt"},
+ {id:"n453",no:"No.453",nm:"ビッグポケットのショートパンツ",pr:712,im:"0000000408523_IOqzxXb.jpg",cat:"pt"},
+ {id:"n1234",no:"No.1234",nm:"子どもニットフードパーカー",pr:632,im:"0000000423703_5eAMwfL.jpg",cat:"kd"},
+ {id:"n1038",no:"No.1038",nm:"セーラーカラーの子どもブラウス＆ワンピース",pr:632,im:"0000000424923_shzgdlW.jpg",cat:"kd"},
+ {id:"n1055",no:"No.1055",nm:"サイドギャザーの子どもノースリーブワンピース",pr:632,im:"0000000424903_Bv95tQt.jpg",cat:"kd"},
+ {id:"n1036",no:"No.1036",nm:"ピンタックとフリルの子どもワンピース",pr:632,im:"0000000422393_bO86L2g.jpg",cat:"kd"},
+ {id:"n1033",no:"No.1033",nm:"前切替えの子どもギャザーワンピース",pr:632,im:"0000000422383_OociYAw.jpg",cat:"kd"},
+ {id:"n7950",no:"No.7950",nm:"ベビーアイテム7点セット",pr:712,im:"0000000354093_M1w8H6u.jpg",cat:"kd"},
+ {id:"n7800",no:"No.7800",nm:"赤ちゃん肌着（2デザイン）",pr:632,im:"0000000298093_A7pfJo8.jpg",cat:"kd"},
+ {id:"n7100",no:"No.7100",nm:"ベビーセットアップ（2デザイン）",pr:632,im:"0000000298063_LfF0QHH.jpg",cat:"kd"},
+];
+const FABRICS=[
+ {id:"helena",code:"Q255",nm:"リネンプリント Helena（ドラゴンフライ）",unit:1192,im:"0000000427973_WHxySxR.jpg",w:"144cm幅",mat:"麻",thin:"中肉・ドレープ"},
+ {id:"marina",code:"Q254",nm:"60番手ストライプのリトアニアリネン Marina",unit:1192,im:"0000000427753_Be0w3Lj.jpg",w:"146cm幅",mat:"麻",thin:"中肉"},
+ {id:"arlette",code:"R1747",nm:"細番手リネン Arlette",unit:792,im:"0000000427703_Y27TV9b.jpg",w:"110cm幅",mat:"麻",thin:"軽い中肉"},
+ {id:"bertina",code:"Q251",nm:"クールグレーストライプの柔らかリネン Bertina",unit:1112,im:"0000000427673_GCg1n3T.jpg",w:"148cm幅",mat:"麻",thin:"柔らか中肉"},
+ {id:"brisa",code:"Q253",nm:"シングルガーゼのリトアニアリネン Brisa",unit:872,im:"0000000427663_TOIApBe.jpg",w:"150cm幅",mat:"麻",thin:"やや薄手"},
+ {id:"petra",code:"Q256",nm:"くったり柔らかリネン Petra",unit:1112,im:"0000000427463_YWo45Yy.jpg",w:"140cm幅",mat:"麻",thin:"柔らか中肉"},
+ {id:"floortje",code:"W3471",nm:"スーピマコットンのポンチニット Floortje",unit:552,im:"0000000425923_ffuc3La.jpg",w:"155cm幅",mat:"綿",thin:"ニット"},
+ {id:"maya",code:"R1730",nm:"オーガニックコットンのシャンブレー Maya",unit:316,im:"0000000425683_UtbYlDL.jpg",w:"98cm幅",mat:"綿",thin:"中肉"},
+ {id:"amelia",code:"R1731",nm:"ドライフラワーのコットンローン Amelia",unit:316,im:"0000000425703_cfldGBi.jpg",w:"108cm幅",mat:"綿",thin:"薄手ローン"},
+ {id:"paula",code:"FFF613",nm:"プレミアムコットンローン Paula",unit:440,im:"0000000422053_qKZuOMn.jpg",w:"110cm幅",mat:"綿",thin:"薄手ローン"},
+ {id:"alma",code:"R1773",nm:"天日干し加工の高密度コットン Alma",unit:356,im:"0000000427493_a9ID7g5.jpg",w:"114cm幅",mat:"綿",thin:"高密度中肉"},
+ {id:"clipps",code:"R1774",nm:"天日干し加工の高密度コットン Clipps",unit:356,im:"0000000427503_3SNcgb8.jpg",w:"114cm幅",mat:"綿",thin:"高密度中肉"},
+ {id:"frankaChk",code:"W3484",nm:"クラシックチェックのウール Franka",unit:396,im:"0000000425963_aJdk2TJ.jpg",w:"145cm幅",mat:"ウール",thin:"オールシーズン"},
+ {id:"marthe",code:"FFF409",nm:"トップ染のプレミアムファブリック Marthe",unit:196,im:"0000000400373_dCb6YOb.jpg",w:"113cm幅",mat:"ウール",thin:"混紡"},
+ {id:"frankaSar",code:"W3348",nm:"さらりとしたオールシーズンウール Franka",unit:316,im:"0000000411153_efbSSLW.jpg",w:"140cm幅",mat:"ウール",thin:"さらり"},
+ {id:"berit",code:"W3457",nm:"ミニギンガムのウール Berit",unit:396,im:"0000000423043_XsGJ7lH.jpg",w:"155cm幅",mat:"ウール",thin:"オールシーズン"},
+ {id:"iris",code:"W3447",nm:"ウール＆シルクの変わり織 Iris",unit:552,im:"0000000423483_Up5DhpD.jpg",w:"150cm幅",mat:"ウール",thin:"ドビー"},
+ {id:"huguette",code:"W3434",nm:"軽やかなオールシーズンウール Huguette",unit:472,im:"0000000419913_RX6DDlo.jpg",w:"145cm幅",mat:"ウール",thin:"軽やか"},
+ {id:"isadora",code:"IS2003",nm:"[Import] CASTILLA ISADORA",unit:2600,im:"0000000427023_tpIbtTA.jpg",w:"140cm幅",mat:"輸入",thin:"ビスコース混"},
+ {id:"adriatico",code:"IS2002",nm:"[Import] CASTILLA ADRIATICO",unit:1800,im:"0000000427003_jZSPB6X.jpg",w:"140cm幅",mat:"輸入",thin:"綿麻"},
+ {id:"bella",code:"IS2001",nm:"[Import] CASTILLA BELLA",unit:1800,im:"0000000426983_HHaIztk.jpg",w:"140cm幅",mat:"輸入",thin:"綿麻"},
+ {id:"francis",code:"IE3204",nm:"[Import] CLARKE & CLARKE FRANCIS",unit:1592,im:"0000000301913_Sw8Zg90.jpg",w:"137cm幅",mat:"輸入",thin:"ビスコース混"},
+ {id:"pastorale",code:"IF1086",nm:"[Import] mfta PASTORALE",unit:1560,im:"0000000314543_UOHfpke.jpg",w:"140cm幅",mat:"輸入",thin:"綿100%"},
+ {id:"compton",code:"IS1112",nm:"[Import] William Morris COMPTON",unit:3160,im:"0000000409193_J34rwMC.jpg",w:"140cm幅",mat:"輸入",thin:"リネンビスコース"},
+];
+/* ---- ENRICH（実機取得・完成品写真/作例/色展開/説明・全URL 200確認） ---- */
+const EP={"n50":{"photos":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2022/50_1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2022/50_2.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2022/50_3.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2022/50_4.jpg"],"desc":"衿つきでスラッシュあきが深めの大人ワンピース。後ろ衿ぐりにタック、ダブルボタンは片方飾りボタン","sizes":"SML・2L"},"n86":{"photos":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2022/86_m214_3-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2022/86_r0640_1-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2023/86_m283_4-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2023/86_wa177_3-1.jpg"],"desc":"ノースリーブフレア風Aラインワンピース。横に広いボートネックが涼しげ、着丈は短丈/長丈2種","sizes":"SML・2L"},"n55":{"photos":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2023/55_m210_1-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2023/55_m269_5-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2023/55_r0896_6-1.jpg"],"desc":"前も後もVネックのシンプルワンピース。着丈はブラウス丈/チュニック丈/ワンピース丈の3種から選択","sizes":"SML・2L"},"n21":{"photos":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2022/21_lf1795-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2022/21_m194_10-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2025/21_fff438_2-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/21_11_c9210_7-1.jpg"],"desc":"前のスラッシュあきと小さな控えめな衿がポイントのフレンチスリーブワンピース","sizes":"SML・2L"},"n6015":{"photos":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/6015_fff570-3.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/6015_sss1035-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/6015_w3421_1-3.jpg"],"desc":"小さな台衿と上衿のコンパクトなシャツカラー。前身頃にたっぷりタック、袖口はギャザー入り","sizes":"SML・2L"},"n128":{"photos":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2022/128-4.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2022/128_c9013_14-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2023/128_lf2057-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2023/128_wa040-1.jpg"],"desc":"センターラインのカーブが特徴のブラウス。脇スリットもラウンドカットでディテールが楽しめる","sizes":"SML・2L"},"n100":{"photos":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2025/100_r1527_4-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2025/100_r1544_1-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/100_q245_1-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/100_r1704_1-1.jpg"],"desc":"ヨーク仕立てのVネックが上品なドロップショルダーブラウス。中心と前裾のタックでふんわり軽い仕上がり","sizes":"SML・2L"},"n317":{"photos":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2022/317_sr1058-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2025/317_den605-1.jpg"],"desc":"Aライン巻きスカート。ショート丈・セミロング丈・ロング丈の3種類から選択","sizes":"SML・2L"},"n403":{"photos":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2024/403_m366_3-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2024/403_q070_2-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2025/403_fff437_1-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/403_e112-1.jpg"],"desc":"ボリュームのあるタックで、スカートにも見えるワイドパンツ","sizes":"SML・2L"},"n1036":{"photos":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2022/1036_lf1835_3-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2022/1036_lf1838_2-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2024/1036_den551-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2025/1036_m705_2-1.jpg"],"desc":"ピンタックとフリルの子どもワンピース（90・100・110サイズ）","sizes":"90・100・110"}};
+const EF={"helena":{"swatch":["https://www.swany-kamakura.co.jp/o_sw/pr_img/q/q255_top.jpg"],"samples":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/151_q255_1-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/422_q255_2-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/6003_q255_1-1.jpg"],"colors":[{"name":"カメオホワイト","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/q/q255_1_1.jpg"},{"name":"フォギーヘザー","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/q/q255_2_1.jpg"},{"name":"アーモンドグリーン","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/q/q255_3_1.jpg"},{"name":"シャモアピーチ","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/q/q255_4_1.jpg"}],"desc":"ヴィンテージソフト加工のリトアニアリネン。ドラゴンフライ柄、中肉厚でとろみのある風合い","mat":"リネン100%","width":"144cm"},"brisa":{"swatch":["https://www.swany-kamakura.co.jp/o_sw/pr_img/q/q253_top.jpg"],"samples":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/542_q253-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/542_q253-2.jpg"],"colors":[],"desc":"ふんわりと軽やかな風合いのシングルガーゼ。透け感はほんのり、リトアニア製","mat":"リネン100%","width":"150cm"},"arlette":{"swatch":["https://www.swany-kamakura.co.jp/o_sw/pr_img/r/r1747_top.jpg"],"samples":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/135_r1747-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/23_r1747-1.jpg"],"colors":[],"desc":"心地よいシャリ感で柔らかな風合い。先染め糸で無地ながら奥行きある上品カラー","mat":"リネン100%","width":"110cm"},"petra":{"swatch":["https://www.swany-kamakura.co.jp/o_sw/pr_img/q/q256_top.jpg"],"samples":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/441_q256-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/60_q256-1.jpg"],"colors":[],"desc":"織りの奥に広がる深みとぬくもり。中肉厚でとろみのある柔らかさ、明るいコーラルピンク","mat":"リネン100%","width":"140cm"},"marina":{"swatch":["https://www.swany-kamakura.co.jp/o_sw/pr_img/q/q254_top.jpg"],"samples":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/449_q254_1-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/6100_q254_2-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/6104_q254_1-1.jpg"],"colors":[{"name":"セージグリーン","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/q/q254_1_1.jpg"},{"name":"アクアブルー","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/q/q254_2_1.jpg"}],"desc":"60番手の細い糸で軽やか。セージグリーン×アクアブルーの繊細な細ストライプ","mat":"リネン100%","width":"146cm"},"amelia":{"swatch":["https://www.swany-kamakura.co.jp/o_sw/pr_img/r/r1731_top.jpg"],"samples":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/2101m_r1731_1-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/327_r1731_1-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/68_r1731_2-1.jpg"],"colors":[{"name":"アイボリーホワイト","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/r/r1731_1_1.jpg"},{"name":"チャコールブラック","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/r/r1731_2_1.jpg"}],"desc":"さらりなめらかな高密度コットンローン。ドライフラワー柄、ふんわり風を通す着用感","mat":"綿100%","width":"108cm"},"maya":{"swatch":["https://www.swany-kamakura.co.jp/o_sw/pr_img/r/r1730_top.jpg"],"samples":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/2101m_r1730-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/68_r1730-1.jpg"],"colors":[],"desc":"オーガニックコットンのスラブ織シャンブレー。光の加減で表情を変える上品なモード感","mat":"綿100%","width":"98cm"},"alma":{"swatch":["https://www.swany-kamakura.co.jp/o_sw/pr_img/r/r1773_top.jpg"],"samples":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/9419_r1773_1-1.jpg"],"colors":[{"name":"ウスヒマワリ","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/r/r1773_1_1.jpg"},{"name":"ウスカラシ","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/r/r1773_2_1.jpg"}],"desc":"made in遠州の天日干し加工高密度コットン。使いやすい中肉厚、ドレープもきれい","mat":"綿100%","width":"114cm"},"frankaChk":{"swatch":["https://www.swany-kamakura.co.jp/o_sw/pr_img/w/w3484_top.jpg","https://www.swany-kamakura.co.jp/o_sw/pr_img/w/w3484_top2.jpg"],"samples":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/115_w3484_2-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/59_w3484_1-1.jpg"],"colors":[{"name":"クラレットブラウン","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/w/w3484_1_1.jpg"},{"name":"オートミール","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/w/w3484_2_1.jpg"},{"name":"モカグレージュ","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/w/w3484_3_1.jpg"},{"name":"ロイヤルネイビー","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/w/w3484_4_1.jpg"}],"desc":"尾州産クラシックチェックのオールシーズンウール。軽やかで扱いやすく幅広いシーズンで活躍","mat":"ウール60%・ポリエステル40%","width":"145cm"},"frankaSar":{"swatch":["https://www.swany-kamakura.co.jp/o_sw/pr_img/w/w3348_top.jpg","https://www.swany-kamakura.co.jp/o_sw/pr_img/w/w3348_top2.jpg"],"samples":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2025/2400m_w3348_1-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2025/325_w3348_3-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2025/446_w3348_1-1.jpg"],"colors":[{"name":"ブラック","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/w/w3348_1_1.jpg"},{"name":"ボルドー","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/w/w3348_2_1.jpg"},{"name":"ハニーイエロー","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/w/w3348_3_1.jpg"},{"name":"ラシャネイビー","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/w/w3348_4_1.jpg"},{"name":"コルク","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/w/w3348_5_1.jpg"},{"name":"スノウホワイト","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/w/w3348_6_1.jpg"},{"name":"オールドリーフ","url":"https://www.swany-kamakura.co.jp/o_sw/pr_img/w/w3348_7_1.jpg"}],"desc":"尾州産の上質なオールシーズンウール。丈夫で軽やか、シワになりにくい綾織のツヤとドレープ","mat":"ウール30%・ポリエステル70%","width":"140cm"},"isadora":{"swatch":["https://www.swany-kamakura.co.jp/o_sw/kp/260615-20.jpg"],"samples":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/30441_c_80cm_is2003_1-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/3138a_c_80cm_is2003_1-1.jpg"],"colors":[],"desc":"スペインCASTILLA TEXTIL社のインポート生地。MTS DIGシリーズ（アウトレット）","mat":"ビスコース70%・リネン30%","width":"140cm"},"bella":{"swatch":["https://www.swany-kamakura.co.jp/o_sw/kp/260615-1.jpg"],"samples":["https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/3138a_c_80cm_is2001_1-1.jpg","https://www.swany-kamakura.co.jp/o_sw/sample_img/2026/35071_is2001_1-1.jpg"],"colors":[],"desc":"スペインCASTILLA TEXTIL社のインポート生地。MTS DIGシリーズ（アウトレット）","mat":"綿85%・リネン15%","width":"140cm"}};
+
+const PAT_BY=Object.fromEntries(PATTERNS.map(p=>[p.id,p]));
+const FAB_BY=Object.fromEntries(FABRICS.map(f=>[f.id,f]));
+const CATNAME={op:"ワンピース",bl:"ブラウス・チュニック",sk:"スカート",pt:"パンツ",kd:"子ども・ベビー"};
+const D_CHIPS=[["all","すべて"],["op","ワンピース"],["bl","ブラウス・チュニック"],["sk","スカート"],["pt","パンツ"],["kd","子ども・ベビー"]];
+const F_CHIPS=[["all","すべて"],["麻","麻（リネン）"],["綿","綿（コットン）"],["ウール","ウール"],["輸入","輸入生地"]];
+const REC_FAB={op:["helena","brisa","petra","marina","amelia"],bl:["arlette","amelia","petra","brisa","helena"],
+  sk:["alma","frankaChk","brisa","maya","helena"],pt:["frankaSar","frankaChk","maya","alma","brisa"],kd:["amelia","maya","brisa","petra"]};
+const FQ={op:5,bl:4,sk:3,pt:4,kd:2};
+const PARTSDEF={op:{tape:1,ito:1,btn:1},bl:{tape:1,ito:1,btn:1},sk:{tape:1,ito:1,btn:0},pt:{tape:1,ito:1,btn:0},kd:{tape:0,ito:1,btn:1}};
+const ALT_PAT=["n55","n100","n317","n403","n86"];
+const MAT_DEF_PAT={"麻":"n55","綿":"n100","ウール":"n317","輸入":"n55"};
+const SHIN={thin:{kind:"接着芯",code:"2F-CUT-R",nm:"洋服用接着芯・極薄ソフト【1Mカット】",price:760,sw:"#9db2c7",note:"約88cm巾×100cm",unit:"1mカット",uses:["衿","前立て","見返し"],img:IMG+"0000000264402_MmPhq3D.jpg",desc:"極薄タイプの接着芯（薄ベージュ）。生地の風合いを生かしながら型崩れを防ぎます。衿・前立て・見返しなど薄手素材に。",photos:[]},
+  soft:{kind:"接着芯",code:"2F-CUT-A",nm:"洋服用接着芯・ソフト【1Mカット】",price:552,sw:"#8aa0b6",note:"約90cm巾×100cm・麻100%",unit:"1mカット",uses:["衿","前立て","見返し"],img:IMG+"0200000000012_pmEx0s1.jpg",desc:"ソフトタイプの接着芯。生地の風合いを生かしながら、しっかり型崩れを防ぎます。",photos:[]}};
+const PART={tape:{kind:"伸び止めテープ",code:"UA0045",nm:"接着伸び止めテープ 12mm×5m巻",price:184,sw:"#c9a97a",unit:"5m巻",uses:["肩","衿ぐり"],img:IMG+"0000000127452.jpg",desc:"直線部分に最適。伸びやすい布やカーブの伸びを抑え、縫いやすくします。肩・衿ぐりに。",photos:["https://www.swany-kamakura.co.jp/onlinetop/shohin_img/ua/ua0045_1.jpg","https://www.swany-kamakura.co.jp/onlinetop/shohin_img/ua/ua0045_2.jpg"]},
+  ito:{kind:"ミシン糸",code:"ITPOLY60",nm:"ポリスパン#60 ミシン糸",price:237,sw:"#b9a48c",unit:"1個(500m)",uses:[],note2:"糸色は生地に合わせてご提案（実装時・例：生成り系）",img:IMG+"0000000335492_Tu7DpQ6.jpg",desc:"ポリエステル100%のお買い得ミシン糸（500m）。豊富なカラー展開から生地に合わせて選べます。",photos:[]},
+  btn:{kind:"ボタン",code:"BB0115",nm:"ウッドボタンミックス",price:132,sw:"#b08d57",unit:"1セット(20個)",uses:[],img:IMG+"0000000108232.jpg",desc:"カラフルな自然素材の木製ボタン20個入り（直径15〜17mm）。天然素材ならではの風合い。",photos:["https://www.swany-kamakura.co.jp/onlinetop/shohin_img/bb/bb0115.jpg","https://www.swany-kamakura.co.jp/onlinetop/shohin_img/bb/bb0115_1.jpg","https://www.swany-kamakura.co.jp/onlinetop/shohin_img/bb/bb0115_2.jpg"]}};
+
+const yen=n=>"¥"+n.toLocaleString();
+const FB=(src,fb)=>`onerror="this.onerror=null;this.src='${fb}'"`;
+// pattern imagery
+const pThumb=p=>IMG+p.im;
+const pPhotos=id=>(EP[id]&&EP[id].photos&&EP[id].photos.length)?EP[id].photos:[IMG+PAT_BY[id].im];
+const pHero=id=>pPhotos(id)[0];
+// fabric imagery
+const fThumb=f=>IMG+f.im;
+const fSamples=id=>(EF[id]&&EF[id].samples&&EF[id].samples.length)?EF[id].samples:[];
+const fSwatch=id=>(EF[id]&&EF[id].swatch&&EF[id].swatch.length)?EF[id].swatch[0]:IMG+FAB_BY[id].im;
+const fColors=id=>(EF[id]&&EF[id].colors)?EF[id].colors:[];
+const fHero=id=>{const s=fSamples(id);return s.length?s[0]:fSwatch(id);};
+
+const ST={d:{q:"",cat:"all",sel:null,fab:null,fq:0,shin:"thin",shinQ:1,parts:{},pQ:{tape:1,ito:1,btn:1},cIdx:0,expanded:false},
+          f:{q:"",mat:"all",sel:null,pat:null,fq:0,shin:"thin",shinQ:1,parts:{},pQ:{tape:1,ito:1,btn:1},cIdx:0,expanded:false}};
+/* スマホ用：グリッドの「もっと見る」折りたたみ（PCではCSSで常時全件表示） */
+function updMore(m,listLen,label){
+  const g=document.getElementById(m+'-grid');g.classList.toggle('collapsed',!ST[m].expanded);
+  const b=document.getElementById(m+'-more');b.style.display=listLen>8?'':'none';
+  b.textContent=ST[m].expanded?'表示を減らす ▲':`すべての${label}を見る（全 ${listLen} 点）▼`;}
+function togMore(m){ST[m].expanded=!ST[m].expanded;m==='d'?renderGridD():renderGridF();
+  if(!ST[m].expanded)document.getElementById(m+'-grid').scrollIntoView({behavior:'smooth',block:'start'});}
+function switchMode(m){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.mode===m));
+  document.getElementById('mode-d').classList.toggle('hidden',m!=='d');document.getElementById('mode-f').classList.toggle('hidden',m!=='f');}
+
+/* ===== GRID (design) ===== */
+function hasPatPhoto(id){return !!(EP[id]&&EP[id].photos&&EP[id].photos.length);}
+function hasFabPhoto(id){return !!(EF[id]&&EF[id].samples&&EF[id].samples.length);}
+function renderDChips(){document.getElementById('d-chips').innerHTML=D_CHIPS.map(([k,l])=>`<div class="chip2 ${ST.d.cat===k?'on':''}" onclick="ST.d.cat='${k}';renderGridD();">${l}</div>`).join('');}
+function filtD(){const q=ST.d.q.trim().toLowerCase();
+  const list=PATTERNS.filter(p=>(ST.d.cat==='all'||p.cat===ST.d.cat)&&(!q||(p.no+p.nm).toLowerCase().includes(q)));
+  return list.slice().sort((a,b)=>hasPatPhoto(b.id)-hasPatPhoto(a.id));}
+function renderGridD(){renderDChips();const list=filtD();
+  document.getElementById('d-count').innerHTML=`全1,000点以上の型紙から　該当 <b>${list.length}</b> 点<span class="photonote">📷 作例写真ありを優先表示</span>`;
+  let h=list.map(p=>{const hp=hasPatPhoto(p.id);return `<div class="pcard ${ST.d.sel===p.id?'sel':''}" onclick="openQV('p','${p.id}')">
+    <div class="imgwrap">
+      <span class="qvhint">🔍 詳細を見る</span>
+      ${hp?`<span class="photobadge">📷 作例あり</span>`:`<span class="photobadge muted">詳細のみ</span>`}
+      <img class="pim" loading="lazy" src="${pThumb(p)}" ${FB(pThumb(p),pThumb(p))}>
+      <div class="badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+    </div>
+    <div class="pc">${p.no}・${CATNAME[p.cat]}</div><div class="pnm">${p.nm}</div><div class="ppr">型紙 ${yen(p.pr)}（税込）</div></div>`;}).join('');
+  h+=`<div class="ghost"><div><b>+1,000</b>点以上<br>絞り込み・検索で<br>すぐ見つかります</div></div>`;
+  document.getElementById('d-grid').innerHTML=h;updMore('d',list.length,'型紙');}
+/* ===== GRID (fabric) ===== */
+function renderFChips(){document.getElementById('f-chips').innerHTML=F_CHIPS.map(([k,l])=>`<div class="chip2 ${ST.f.mat===k?'on':''}" onclick="ST.f.mat='${k}';renderGridF();">${l}</div>`).join('');}
+function filtF(){const q=ST.f.q.trim().toLowerCase();
+  const list=FABRICS.filter(f=>(ST.f.mat==='all'||f.mat===ST.f.mat)&&(!q||(f.code+f.nm+f.mat).toLowerCase().includes(q)));
+  return list.slice().sort((a,b)=>hasFabPhoto(b.id)-hasFabPhoto(a.id));}
+function renderGridF(){renderFChips();const list=filtF();
+  document.getElementById('f-count').innerHTML=`全2,000点以上の生地から　該当 <b>${list.length}</b> 点<span class="photonote">📷 作例写真ありを優先表示</span>`;
+  let h=list.map(f=>{const hp=hasFabPhoto(f.id);return `<div class="pcard fab ${ST.f.sel===f.id?'sel':''}" onclick="openQV('f','${f.id}')">
+    <div class="imgwrap">
+      <span class="qvhint">🔍 詳細を見る</span>
+      ${hp?`<span class="photobadge">📷 作例あり</span>`:`<span class="photobadge muted">詳細のみ</span>`}
+      <img class="pim" loading="lazy" src="${fSwatch(f.id)}" ${FB(fSwatch(f.id),fThumb(f))}>
+      <div class="badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+    </div>
+    <div class="pc">${f.code}・${f.mat}</div><div class="pnm">${f.nm}</div><div class="ppr">${yen(f.unit)}／50cm・${f.w}</div></div>`;}).join('');
+  h+=`<div class="ghost"><div><b>+2,000</b>点以上<br>素材・柄・色で<br>絞り込めます</div></div>`;
+  document.getElementById('f-grid').innerHTML=h;updMore('f',list.length,'生地');}
+
+/* ===== QUICK VIEW ===== */
+let QV={type:null,id:null,imgs:[],idx:0};
+function openQV(type,id){
+  QV.type=type;QV.id=id;QV.idx=0;
+  const curMode=(document.querySelector('.tab.active')||{}).dataset?.mode||'d';
+  document.getElementById('qvov').className='ov '+(curMode==='f'?'accent-f':'accent-d');
+  if(type==='p'){const p=PAT_BY[id];QV.imgs=pPhotos(id);const canPropose=hasPatPhoto(id);
+    const meters=(FQ[p.cat]*0.5).toFixed(1);
+    document.getElementById('qv').innerHTML=`
+      <div class="qvhead"><div class="t">型紙の詳細 ・ ${p.no}</div><button class="qvclose" onclick="closeQV()">✕</button></div>
+      <div class="qvbody">
+        <div><div class="qvmain"><img id="qvmain" src="${QV.imgs[0]}" ${FB(QV.imgs[0],pThumb(p))}></div>
+          <div class="qvthumbs">${QV.imgs.map((u,i)=>`<img class="${i===0?'on':''}" src="${u}" ${FB(u,pThumb(p))} onclick="qvSet(${i})">`).join('')}</div></div>
+        <div class="qvinfo"><div class="qcode">${p.no} / ${CATNAME[p.cat]}</div><h2>${p.nm}</h2><div class="qprice">型紙 ${yen(p.pr)}（税込）</div>
+          <p class="qdesc">${(EP[id]&&EP[id].desc)||"シンプルで作りやすいデザインです。"}</p>
+          <div class="qspec">
+            <div class="row"><span class="kk">サイズ</span><span class="vv">${(EP[id]&&EP[id].sizes)||"SML・2L"}</span></div>
+            <div class="row"><span class="kk">用尺の目安</span><span class="vv">約${meters}m（生地幅で変動）</span></div>
+            <div class="row"><span class="kk">必要な資材</span><span class="vv">生地・接着芯・ミシン糸ほか（自動提案）</span></div>
+          </div>
+          <button class="qcta ${canPropose?'':'qcta-disabled'}" ${canPropose?'onclick="qvCommit()"':'disabled'}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>${canPropose?'このデザインで提案してもらう':'自動提案デモは対象外です'}</button>
+          ${canPropose?'':'<div class="qvdisablenote">本デモの自動提案は、作例写真のある型紙10点のみご体験いただけます。一覧の緑「📷 作例あり」表示が対象です。</div>'}
+        </div></div>
+      <div class="qvnote">※ 写真は実際にこの型紙で仕立てた作品例です（生地は作品ごとに異なります）。用尺・必要資材は選んだ生地に合わせて自動提案します。</div>`;
+  }else if(type==='n'){const it=id.startsWith('shin_')?SHIN[id.slice(5)]:PART[id];QV.imgs=[it.img,...(it.photos||[])];
+    document.getElementById('qv').innerHTML=`
+      <div class="qvhead"><div class="t">資材の詳細 ・ ${it.kind}</div><button class="qvclose" onclick="closeQV()">✕</button></div>
+      <div class="qvbody">
+        <div><div class="qvmain"><img id="qvmain" src="${QV.imgs[0]}" ${FB(QV.imgs[0],it.img)}></div>
+          ${QV.imgs.length>1?`<div class="qvthumbs">${QV.imgs.map((u,i)=>`<img class="${i===0?'on':''}" src="${u}" ${FB(u,it.img)} onclick="qvSet(${i})">`).join('')}</div>`:''}</div>
+        <div class="qvinfo"><div class="qcode">${it.kind} ・ 品番 ${it.code}</div><h2>${it.nm}</h2><div class="qprice">${yen(it.price)}（税込）</div>
+          <p class="qdesc">${it.desc}</p>
+          <div class="qspec">
+            <div class="row"><span class="kk">品番</span><span class="vv">${it.code}</span></div>
+            <div class="row"><span class="kk">販売単位</span><span class="vv">${it.unit}</span></div>
+            ${it.uses&&it.uses.length?`<div class="row"><span class="kk">主な使用部位</span><span class="vv">${it.uses.join('・')}</span></div>`:''}
+            <div class="row"><span class="kk">この提案での数量</span><span class="vv">自動提案（パネルで＋−調整できます）</span></div>
+          </div>
+          <button class="qcta" onclick="closeQV()">閉じる</button>
+        </div></div>
+      <div class="qvnote">※ 画像・仕様は swany.jp の実在商品に基づきます。数量は自動提案パネルで調整してください。</div>`;
+    document.getElementById('qvov').classList.add('show');return;
+  }else{const f=FAB_BY[id];const cols=fColors(id);const canPropose=hasFabPhoto(id);QV.imgs=[...(EF[id]&&EF[id].swatch||[fSwatch(id)]),...fSamples(id)];
+    document.getElementById('qv').innerHTML=`
+      <div class="qvhead"><div class="t">生地の詳細 ・ ${f.code}</div><button class="qvclose" onclick="closeQV()">✕</button></div>
+      <div class="qvbody">
+        <div><div class="qvmain"><img id="qvmain" src="${QV.imgs[0]}" ${FB(QV.imgs[0],fThumb(f))}></div>
+          <div class="qvthumbs">${QV.imgs.map((u,i)=>`<img class="${i===0?'on':''}" src="${u}" ${FB(u,fThumb(f))} onclick="qvSet(${i})">`).join('')}</div></div>
+        <div class="qvinfo"><div class="qcode">${f.code} / ${f.mat}</div><h2>${f.nm}</h2><div class="qprice">${yen(f.unit)}／50cm</div>
+          <p class="qdesc">${(EF[id]&&EF[id].desc)||f.thin}</p>
+          ${cols.length?`<div style="font-size:11px;color:var(--sub);margin-bottom:3px">色展開 ${cols.length}色</div><div class="qcolors">${cols.map((c,i)=>`<div class="qc ${i===0?'on':''}" onclick="qvSetColor(${i})"><img src="${c.url}" ${FB(c.url,fThumb(f))}><span>${c.name.length>6?c.name.slice(0,6):c.name}</span></div>`).join('')}</div>`:''}
+          <div class="qspec">
+            <div class="row"><span class="kk">素材</span><span class="vv">${(EF[id]&&EF[id].mat)||f.mat}</span></div>
+            <div class="row"><span class="kk">生地幅</span><span class="vv">${(EF[id]&&EF[id].width)||f.w}</span></div>
+            <div class="row"><span class="kk">おすすめ</span><span class="vv">ワンピース・ブラウス・小物ほか</span></div>
+          </div>
+          <button class="qcta ${canPropose?'':'qcta-disabled'}" ${canPropose?'onclick="qvCommit()"':'disabled'}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>${canPropose?'この生地で提案してもらう':'自動提案デモは対象外です'}</button>
+          ${canPropose?'':'<div class="qvdisablenote">本デモの自動提案は、作例写真のある生地12点のみご体験いただけます。一覧の緑「📷 作例あり」表示が対象です。</div>'}
+        </div></div>
+      <div class="qvnote">※ 作例写真は実際にこの生地で仕立てた作品です。色展開・風合いは実在の商品情報に基づきます。</div>`;
+  }
+  document.getElementById('qvov').classList.add('show');
+}
+function qvSet(i){QV.idx=i;document.getElementById('qvmain').src=QV.imgs[i];
+  document.querySelectorAll('.qvthumbs img').forEach((el,k)=>el.classList.toggle('on',k===i));}
+function qvSetColor(i){const c=fColors(QV.id)[i];document.getElementById('qvmain').src=c.url;
+  document.querySelectorAll('.qcolors .qc').forEach((el,k)=>el.classList.toggle('on',k===i));}
+function qvCommit(){closeQV();if(QV.type==='p'){switchMode('d');selPat(QV.id);}else if(QV.type==='f'){switchMode('f');selFab(QV.id);}}
+function closeQV(){document.getElementById('qvov').classList.remove('show');}
+
+/* ===== SELECT ===== */
+function selPat(id){const p=PAT_BY[id];ST.d.sel=id;ST.d.fab=REC_FAB[p.cat][0];ST.d.fq=FQ[p.cat];ST.d.shin='thin';ST.d.shinQ=1;ST.d.parts={...PARTSDEF[p.cat]};ST.d.pQ={tape:1,ito:1,btn:1};ST.d.cIdx=0;
+  renderGridD();renderProp('d',true);document.getElementById('d-prop').style.display='block';document.getElementById('d-prop').scrollIntoView({behavior:'smooth',block:'start'});}
+function selFab(id){const f=FAB_BY[id];ST.f.sel=id;ST.f.pat=MAT_DEF_PAT[f.mat]||'n55';ST.f.fq=FQ[PAT_BY[ST.f.pat].cat];ST.f.shin='thin';ST.f.shinQ=1;ST.f.parts={...PARTSDEF[PAT_BY[ST.f.pat].cat]};ST.f.pQ={tape:1,ito:1,btn:1};ST.f.cIdx=0;
+  renderGridF();renderProp('f',true);document.getElementById('f-prop').style.display='block';document.getElementById('f-prop').scrollIntoView({behavior:'smooth',block:'start'});}
+
+/* ===== helpers to resolve current fab/pat per mode ===== */
+function curFab(m){return FAB_BY[m==='d'?ST.d.fab:ST.f.sel];}
+function curPat(m){return PAT_BY[m==='d'?ST.d.sel:ST.f.pat];}
+function fabColorImg(m){const f=curFab(m),cols=fColors(f.id),i=ST[m].cIdx;return cols.length&&cols[i]?cols[i].url:fSwatch(f.id);}
+
+/* ===== PROPOSAL ===== */
+function renderProp(m,anim){const fab=curFab(m),pat=curPat(m);
+  let h=renderVisual(m,fab,pat);
+  h+=kit(m,fab,pat);
+  const el=document.getElementById(m+'-panel');
+  el.classList.toggle('anim',!!anim);
+  el.innerHTML=h;
+  document.getElementById(m+'-setbar').innerHTML=setbar(total(m),count(m),m);
+}
+/* ===== VISUAL：モード別の作例グリッド ===== */
+function esc(s){return String(s).replace(/'/g,"\\'").replace(/"/g,'').replace(/</g,'');}
+function patNo(url){const mm=(url.split('/').pop()||'').match(/^(\d+)/);return mm?('No.'+mm[1]):'作例';}
+function renderVisual(m,fab,pat){
+  if(m==='d'){
+    const photos=pPhotos(pat.id),has=EP[pat.id]&&EP[pat.id].photos&&EP[pat.id].photos.length;
+    let h=`<div class="vishead"><img class="vhthumb" loading="lazy" src="${pThumb(pat)}" ${FB(pThumb(pat),pThumb(pat))}>
+      <div><div class="vhk">選んだデザイン</div><div class="vhname">${pat.no}　${pat.nm}</div><div class="vhsub">${CATNAME[pat.cat]}／型紙 ${yen(pat.pr)}（税込）</div></div></div>
+      <div class="vissec">この型紙で仕立てた作例<span class="visnote">いろいろな生地で・タップで拡大</span></div>`;
+    h+=has?`<div class="visgrid">${photos.map(u=>`<figure class="vistile" onclick="lightbox('${esc(u)}','${esc(pat.no+' '+pat.nm)}｜作例')"><img loading="lazy" src="${u}" ${FB(u,pThumb(pat))}><span class="noba">${pat.no}</span></figure>`).join('')}</div>`
+      :`<div class="visempty">この型紙の作例写真は準備中です（オンラインショップに掲載）。</div>`;
+    return h;
+  }else{
+    const samples=fSamples(fab.id),cols=fColors(fab.id),fimg=fabColorImg(m);
+    let h=`<div class="fabcard"><img class="fcimg" loading="lazy" src="${fimg}" ${FB(fimg,fThumb(fab))} onclick="lightbox('${esc(fimg)}','${esc(fab.nm)}')">
+      <div class="fcinfo"><div class="vhk">選んだ生地</div><div class="vhname">${fab.nm}</div>
+        <div class="vhsub">${fab.code}／${yen(fab.unit)}／50cm・${(EF[fab.id]&&EF[fab.id].width)||fab.w}・${fab.mat}</div>
+        <div class="vhdesc">${(EF[fab.id]&&EF[fab.id].desc)||fab.thin}</div>
+        ${cols.length?`<div class="fccols">${cols.map((c,i)=>`<img class="col ${i===ST[m].cIdx?'on':''}" loading="lazy" src="${c.url}" ${FB(c.url,fThumb(fab))} title="${c.name}" onclick="pickColor('${m}',${i})">`).join('')}<span class="colname">選択中：${(cols[ST[m].cIdx]||cols[0]).name}</span></div>`:''}
+      </div></div>
+      <div class="vissec">この生地で作れる作品<span class="visnote">タップで拡大・使われた型紙が分かります</span></div>`;
+    h+=samples.length?`<div class="visgrid">${samples.map(u=>`<figure class="vistile" onclick="lightbox('${esc(u)}','型紙 ${patNo(u)}｜${esc(fab.nm.split('（')[0])}で仕立てた作例')"><img loading="lazy" src="${u}" ${FB(u,fThumb(fab))}><span class="noba">型紙 ${patNo(u)}</span></figure>`).join('')}</div>`
+      :`<div class="visempty">この生地の作例写真は準備中です（オンラインショップに掲載）。</div>`;
+    return h;
+  }
+}
+function lightbox(src,cap){document.getElementById('lbimg').src=src;document.getElementById('lbcap').textContent=cap;document.getElementById('lbov').classList.add('show');}
+function closeLB(){document.getElementById('lbov').classList.remove('show');}
+
+/* ===== KIT (shared actionable set) ===== */
+const useTags=arr=>arr&&arr.length?arr.map(u=>`<span class="usetag">${u}</span>`).join(''):'';
+const MAGI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>';
+const detailBtn=(label,onclick)=>`<div class="detailbtn" onclick="${onclick}">${MAGI}${label}</div>`;
+function kit(m,fab,pat){const st=ST[m];const meters=(st.fq*0.5).toFixed(1),fsum=fab.unit*st.fq,cols=fColors(fab.id),fimg=fabColorImg(m);
+  const hasPhoto=EP[pat.id]&&EP[pat.id].photos&&EP[pat.id].photos.length;
+  let h=`<div class="kit">`;
+  // pattern summary — fabric mode shows finished-garment photo (📷 完成イメージ)
+  const patImg=(m==='f'&&hasPhoto)?pHero(pat.id):pThumb(pat);
+  h+=`<div class="slot"><div class="item"><img class="mimg ${(m==='f'&&hasPhoto)?'':'contain'}" src="${patImg}" loading="lazy" ${FB(patImg,pThumb(pat))} onclick="openQV('p','${pat.id}')" style="cursor:zoom-in">
+    <div class="imeta"><div class="kind">${m==='f'?'おすすめデザイン・型紙':'選んだデザイン'} ・ ${pat.no} ${m==='f'?'<span class="rec">📷 完成イメージ</span>':''}</div>
+      <div class="inm">${pat.nm}</div>
+      ${detailBtn('詳しく見る（作例写真）',`openQV('p','${pat.id}')`)}
+      <div class="idesc">${CATNAME[pat.cat]}${m==='f'?'（この生地に合うおすすめ）':''}</div>
+      ${m==='f'?`<div class="swrap"><div class="lbl">他のおすすめデザインから選ぶ</div><div class="swrow">${ALT_PAT.map(k=>{const q=PAT_BY[k];const qi=(EP[k]&&EP[k].photos&&EP[k].photos.length)?EP[k].photos[0]:pThumb(q);return `<div class="sw ${k===st.pat?'on':''}" onclick="patF('${k}')"><img src="${qi}" loading="lazy" ${FB(qi,pThumb(q))}><div class="sn">${q.no}</div><div class="sp">${yen(q.pr)}</div></div>`;}).join('')}</div></div>`:''}
+    </div><div class="ip">${yen(pat.pr)}</div></div></div>`;
+  // fabric (design mode: STAR image / fabric mode: compact — big card already above)
+  h+=`<div class="slot"><div class="item"><img class="${m==='f'?'mimg':'fimg'}" id="${m}-fabimg" src="${fimg}" loading="lazy" ${FB(fimg,fThumb(fab))} onclick="openQV('f','${fab.id}')" style="cursor:zoom-in">
+    <div class="imeta"><div class="kind">おすすめ生地 ・ ${fab.code} <span class="rec">おすすめ</span></div>
+      <div class="inm">${fab.nm}</div>
+      ${detailBtn('詳しく見る（色展開・作例）',`openQV('f','${fab.id}')`)}
+      <div class="idesc">${(EF[fab.id]&&EF[fab.id].desc)||fab.thin}／${(EF[fab.id]&&EF[fab.id].width)||fab.w}</div>
+      ${cols.length?`<div class="cols"><span class="clab">色を選ぶ（${cols.length}色）<span class="colname">選択中：${(cols[st.cIdx]||cols[0]).name}</span></span>${cols.map((c,i)=>`<img class="col ${i===st.cIdx?'on':''}" src="${c.url}" loading="lazy" ${FB(c.url,fThumb(fab))} title="${c.name}" onclick="pickColor('${m}',${i})">`).join('')}</div>`:''}
+      <div class="priceline"><div><div class="stepper"><button onclick="len('${m}',-1)">−</button><span class="val">${meters}m</span><button onclick="len('${m}',1)">＋</button></div>
+        <span class="uom">50cm単位</span> <span class="yakko">用尺目安 ${meters}m</span></div><div class="ip">${yen(fsum)}</div></div>
+      ${m==='d'?`<div class="swrap"><div class="lbl">他のおすすめ生地から選ぶ（${CATNAME[pat.cat]}向け）</div><div class="swrow">${REC_FAB[pat.cat].map(k=>{const g=FAB_BY[k];return `<div class="sw ${k===st.fab?'on':''}" onclick="pickFab('${k}')"><img src="${fSwatch(k)}" loading="lazy" ${FB(fSwatch(k),fThumb(g))}><div class="sn">${g.nm.split(' ')[0]}</div><div class="sp">${yen(g.unit)}</div></div>`;}).join('')}</div></div>`:''}
+    </div></div></div>`;
+  // shin (image + swap + quantity + detail + 品番/部位)
+  const sh=SHIN[st.shin];
+  h+=`<div class="slot"><div class="item"><img class="mimg" src="${sh.img}" loading="lazy" ${FB(sh.img,fThumb(fab))} onclick="openQV('n','shin_${st.shin}')" style="cursor:zoom-in">
+    <div class="imeta"><div class="kind">接着芯 ・ ${sh.code} <span class="rec">おすすめ</span></div>
+      <div class="inm">${sh.nm}</div>
+      ${detailBtn('詳しく見る',`openQV('n','shin_${st.shin}')`)}
+      <div class="idesc">${useTags(sh.uses)}に使用｜${sh.desc}</div>
+      <div class="swrap"><div class="lbl">選び替え</div><div class="swrow">${Object.keys(SHIN).map(k=>{const x=SHIN[k];return `<div class="sw ${k===st.shin?'on':''}" onclick="pickShin('${m}','${k}')"><img src="${x.img}" loading="lazy" ${FB(x.img,fThumb(fab))}><div class="sn">${x.nm.includes('極薄')?'極薄ソフト':'ソフト'}</div><div class="sp">${yen(x.price)}</div></div>`;}).join('')}</div></div>
+      <div class="priceline"><div><div class="stepper"><button onclick="lenShin('${m}',-1)">−</button><span class="val">${st.shinQ} 枚</span><button onclick="lenShin('${m}',1)">＋</button></div> <span class="uom">1枚＝1mカット</span></div><div class="ip">${yen(sh.price*st.shinQ)}</div></div>
+    </div></div></div>`;
+  // parts (image + checkbox + quantity + detail + 品番/部位)
+  h+=`<div class="slot"><div class="kind" style="margin-bottom:10px">その他の副資材（必要なものだけ・数量も選べます）</div><div class="parts">`;
+  ["tape","ito","btn"].forEach(k=>{const e=PART[k],on=st.parts[k];
+    h+=`<div class="part ${on?'':'off'}">
+      <div class="cbx ${on?'on':''}" onclick="togP('${m}','${k}')"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <img class="pimg" src="${e.img}" loading="lazy" ${FB(e.img,fThumb(fab))} onclick="openQV('n','${k}')">
+      <div class="pmeta"><div class="pk">${e.kind} ・ ${e.code}</div><div class="pn">${e.nm}</div>
+        <div class="idesc">${e.uses&&e.uses.length?useTags(e.uses)+'に使用｜':''}${e.unit}${e.note2?`<br><span style="color:#4a7a4a">${e.note2}</span>`:''}</div>
+        ${detailBtn('詳しく見る',`openQV('n','${k}')`)}</div>
+      <div class="partright"><div class="stepper" style="${on?'':'opacity:.4;pointer-events:none'}"><button onclick="lenPart('${m}','${k}',-1)">−</button><span class="val">${st.pQ[k]}</span><button onclick="lenPart('${m}','${k}',1)">＋</button></div><div class="pp">${yen(e.price*st.pQ[k])}</div></div>
+    </div>`;});
+  h+=`</div></div>`;
+  // 解析風の根拠表示（実データ由来の部位のみ）
+  const useBits=[`${sh.uses.join('・')}に${sh.kind}`];
+  if(st.parts.tape)useBits.push(`${PART.tape.uses.join('・')}に${PART.tape.kind}`);
+  h+=`<div class="why"><div class="whyh">🔎 自動解析（実装イメージ）</div>
+    <div class="wl">・${pat.no}「${pat.nm}」のパーツ構成・縫製箇所を解析</div>
+    <div class="wl">・${useBits.join('／')}をご提案</div>
+    <div class="wl">・用尺の目安 ${meters}m（生地幅${(EF[fab.id]&&EF[fab.id].width)||fab.w}で計算・50cm×${st.fq}カット）</div></div></div>`;
+  return h;
+}
+function total(m){const st=ST[m];let t=curPat(m).pr+curFab(m).unit*st.fq+SHIN[st.shin].price*st.shinQ;["tape","ito","btn"].forEach(k=>{if(st.parts[k])t+=PART[k].price*st.pQ[k];});return t;}
+function count(m){return 2+["tape","ito","btn"].filter(k=>ST[m].parts[k]).length;}
+function len(m,d){ST[m].fq=Math.max(1,ST[m].fq+d);renderProp(m);}
+function lenShin(m,d){ST[m].shinQ=Math.max(1,ST[m].shinQ+d);renderProp(m);}
+function lenPart(m,k,d){if(!ST[m].parts[k])return;ST[m].pQ[k]=Math.max(1,ST[m].pQ[k]+d);renderProp(m);}
+function pickFab(k){ST.d.fab=k;ST.d.cIdx=0;renderProp('d',true);}
+function patF(k){ST.f.pat=k;ST.f.fq=FQ[PAT_BY[k].cat];ST.f.parts={...PARTSDEF[PAT_BY[k].cat]};renderProp('f',true);}
+function pickColor(m,i){ST[m].cIdx=i;renderProp(m);}
+function pickShin(m,k){ST[m].shin=k;renderProp(m);}
+function togP(m,k){ST[m].parts[k]=!ST[m].parts[k];renderProp(m);}
+
+function setbar(t,c,m){const st=ST[m],p=curPat(m),f=curFab(m),sh=SHIN[st.shin],meters=(st.fq*0.5).toFixed(1);
+  const items=[[pThumb(p),'型紙 ×1'],[fabColorImg(m),`生地 ${meters}m`],[sh.img,`接着芯 ×${st.shinQ}`]];
+  ["tape","ito","btn"].forEach(k=>{if(st.parts[k])items.push([PART[k].img,`${PART[k].kind} ×${st.pQ[k]}`]);});
+  const strip=items.map(([im,lb])=>`<span class="si"><img src="${im}" loading="lazy"><b>${lb}</b></span>`).join(`<span class="plus">＋</span>`);
+  return `<div class="step" style="margin:20px 0 10px"><span class="n">3</span>一括購入</div>
+  <div class="setbar"><div class="setstrip"><span class="sl">推奨セット（すべてまとめてカートへ）</span>${strip}</div>
+  <div class="stotal"><small>推奨セット 合計金額</small><b>${yen(t)}</b><span class="tax">（税込・概算）</span> <span class="cnt">／ ${c}点</span></div>
+  <button class="cta" onclick="openCart('${m}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>すべてをカートに入れる</button></div>`;}
+function openCart(m){const st=ST[m],p=curPat(m),f=curFab(m),sh=SHIN[st.shin],meters=(st.fq*0.5).toFixed(1),cols=fColors(f.id);
+  const cname=cols.length&&cols[st.cIdx]?`（${cols[st.cIdx].name}）`:'';
+  let list=mrow(p.no+' '+p.nm,'型紙 ×1',pThumb(p))+mrow(f.nm+cname,`生地 ${meters}m（50cm×${st.fq}）`,fabColorImg(m))+mrow(sh.nm,`接着芯 ×${st.shinQ}`,sh.img);
+  ["tape","ito","btn"].forEach(k=>{if(st.parts[k])list+=mrow(PART[k].nm,`${PART[k].kind} ×${st.pQ[k]}`,PART[k].img);});
+  document.getElementById('m-list').innerHTML=list+`<div class="mtotal"><span>合計 ${count(m)}点</span><span>${yen(total(m))}（税込・概算）</span></div>`;
+  document.getElementById('m-tech').innerHTML=`実装イメージ：この操作は本番では <code>/api/basket/add.html</code> へ ${count(m)}商品を <code>||</code> 区切りで一括POST（「カゴだけmakeshop」機能・1回最大50商品）。買い忘れゼロで、実際の画面ではこのままお会計へ進めます。`;
+  document.getElementById('cartov').classList.add('show');}
+function mrow(n,q,im){return `<div class="mrow"><img class="mth" src="${im}" loading="lazy"><span class="ml">${n}</span><span class="mq">${q}</span></div>`;}
+function closeCart(){document.getElementById('cartov').classList.remove('show');}
+
+// init（既定で1点選択済み）
+renderGridD();renderGridF();
+ST.d.sel='n50';(function(){const p=PAT_BY.n50;ST.d.fab=REC_FAB[p.cat][0];ST.d.fq=FQ[p.cat];ST.d.parts={...PARTSDEF[p.cat]};})();renderGridD();renderProp('d',true);
+ST.f.sel='helena';ST.f.pat=MAT_DEF_PAT['麻'];ST.f.fq=FQ[PAT_BY[ST.f.pat].cat];ST.f.parts={...PARTSDEF[PAT_BY[ST.f.pat].cat]};renderGridF();renderProp('f',true);
+</script>
+</body>
+</html>
